@@ -28,26 +28,11 @@
       </div>
       <p style="margin:0; max-width:640px; font-size:13px; line-height:1.55; color:#475467; text-wrap:pretty">A segmented control picks the level; the list stays flat and each row shows its parent path. Selecting a parent adds a removable filter chip. Best for jumping sideways — "show me every site" is one tap. The search bar looks across all three levels at once; the toggle then narrows results to one level. Selecting any row opens its profile on the right.</p>
       <div style="display:flex; gap:16px; align-items:stretch">
-      <div style="{{ sideStyle }}">
-        <sc-if value="{{ railOn }}" hint-placeholder-val="{{ false }}">
-          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:10px; padding:12px 0">
-            <button onClick="{{ expandSide }}" title="Expand directory" style="width:36px; height:36px; border-radius:9px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></button>
-            <button onClick="{{ expandSearch }}" title="Search" style="width:36px; height:36px; border-radius:9px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></button>
-            <div style="width:28px; height:1px; background:#EEF1F5; margin:4px 0"></div>
-            <sc-for list="{{ railItems }}" as="ri" hint-placeholder-count="3">
-              <div onClick="{{ ri.go }}" title="{{ ri.title }}" style="display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; width:100%; padding:4px 0; box-shadow:{{ ri.edge }}">
-                <div style="{{ ri.avatarStyle }}">{{ ri.initials }}</div>
-                <span style="font-size:9.5px; font-weight:700; color:{{ ri.labelColor }}; font-variant-numeric:tabular-nums; letter-spacing:0.02em">{{ ri.label }}</span>
-              </div>
-            </sc-for>
-          </div>
-        </sc-if>
-        <sc-if value="{{ sideOpen }}" hint-placeholder-val="{{ true }}">
+      <div style="flex:0 0 340px; background:#fff; border:1px solid #E3E8EE; border-radius:14px; height:620px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05)">
         <div style="padding:14px 14px 12px; display:flex; flex-direction:column; gap:11px; border-bottom:1px solid #F1F4F8">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
             <span style="font-size:15.5px; font-weight:700; letter-spacing:-0.01em">Directory</span>
             <div style="display:flex; align-items:center; gap:6px">
-              <button onClick="{{ collapseSide }}" title="Collapse directory" style="width:28px; height:28px; border-radius:8px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg></button>
               <span style="width:28px; height:28px; border-radius:8px; background:#FFF4EC; color:#E2620F; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600">+</span>
             </div>
           </div>
@@ -155,7 +140,6 @@
               </div>
             </sc-if>
           </div>
-        </sc-if>
         </sc-if>
       </div>
       <div style="position:relative; flex:1 1 0; min-width:0; height:620px; background:#fff; border:1px solid #E3E8EE; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05)">
@@ -389,7 +373,7 @@ class Component extends DCLogic {
     scope: 1, filterAcct: null, filterComp: null, scopeSel: null, pinned: null, broad: [false, false, false],
     open: { sun: true, sbp: true }, treeSel: "sbp",
     q: "", submitted: "", autoTab: false, qFocus: false,
-    modal: null, confirmText: "", toast: "", collapsed: false, keepOpen: false
+    modal: null, confirmText: "", toast: ""
   };
 
   componentDidUpdate() {
@@ -626,27 +610,9 @@ class Component extends DCLogic {
       pSimilarTitle: prof && prof.similar.length ? plural(prof.similar.length, "other site") + " with a similar name" : ""
     };
 
-    const railOn = s.collapsed;
-    const expand = (fn) => () => { this.setState({ collapsed: false }); fn && fn(); };
-    const railItems = [];
-    if (pp) railItems.push({ title: "Account · " + pp.name, initials: pp.initials, label: "ACCT", obj: pp, go: expand(selAcct(pp)), last: !pc });
-    if (pc) railItems.push({ title: "Company · " + pc.name, initials: pc.initials, label: "COMP", obj: pc, go: expand(selComp(pp, pc)), last: !px });
-    if (px) railItems.push({ title: "Site · " + px.name + " (" + px.code + ")", initials: px.initials, label: px.code, obj: px, go: expand(), last: true });
-    const railVals = {
-      railOn, sideOpen: !railOn,
-      sideStyle: "flex:0 0 " + (railOn ? 60 : 340) + "px; background:#fff; border:1px solid #E3E8EE; border-radius:14px; height:620px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05); transition:flex-basis .22s ease",
-      railItems: railItems.map(r => ({ ...r, avatarStyle: av(r.obj.bg, r.obj.fg, 34), edge: r.last ? "inset 3px 0 0 #E2620F" : "none", labelColor: r.last ? "#B44B08" : "#98A2B3" })),
-      expandSide: () => this.setState({ collapsed: false }),
-      expandSearch: () => { this.setState({ collapsed: false }); setTimeout(() => { const i = document.querySelector('input[type="search"], input[placeholder*="earch"]'); i && i.focus(); }, 60); },
-      collapseSide: () => this.setState({ collapsed: true }),
-      toggleKeep: () => this.setState(st => ({ keepOpen: !st.keepOpen })),
-      keepTitle: s.keepOpen ? "Pinned open — click to auto-collapse after picking a site" : "Keep directory open after picking a site",
-      keepStyle: "width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; border:1px solid " + (s.keepOpen ? "#FBD9BC" : "#E3E8EE") + "; background:" + (s.keepOpen ? "#FFF4EC" : "#fff") + "; color:" + (s.keepOpen ? "#E2620F" : "#98A2B3")
-    };
     return {
       ...slide,
       ...modalVals,
-      ...railVals,
       hasQ: s.q.length > 0,
       pending: s.q.trim().length > 0 && s.q.trim() !== s.submitted,
       noResultsText: "No " + nouns[s.scope] + " match \u201C" + s.submitted + "\u201D",
