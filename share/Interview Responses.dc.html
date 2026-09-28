@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#EEF1F5; font-family:Figtree, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; color:#101828; }
+  a { color:#E2620F; text-decoration:none; }
+  a:hover { color:#B44B08; text-decoration:underline; }
+  input, button { font-family:inherit; }
+</style>
+</helmet>
+<div style="max-width:1040px; margin:0 auto; padding:32px 24px 64px; display:flex; flex-direction:column; gap:18px">
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+    <div style="display:flex; flex-direction:column; gap:4px">
+      <span style="font-size:11px; font-weight:800; letter-spacing:0.09em; color:#B44B08">UX RESEARCH · DIRECTORY</span>
+      <span style="font-size:24px; font-weight:800; letter-spacing:-0.02em">Interview responses</span>
+      <span style="font-size:13px; color:#667085">{{ subText }}</span>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+      <span style="font-size:12px; color:#667085">{{ syncText }}</span>
+      <button onClick="{{ syncNow }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">Sync now</button>
+      <button onClick="{{ exportCsv }}" style="border:0; background:#E2620F; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer" style-hover="background:#C9550B">Export CSV</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+    <sc-for list="{{ views }}" as="v" hint-placeholder-count="2">
+      <button onClick="{{ v.go }}" style="{{ v.style }}">{{ v.label }}</button>
+    </sc-for>
+    <input value="{{ filter }}" onChange="{{ onFilter }}" placeholder="Filter answers…" style="margin-left:auto; width:220px; max-width:100%; border:1px solid #E3E8EE; border-radius:9px; padding:8px 11px; font-size:13px; outline:none; background:#fff" style-focus="border-color:#E2620F" />
+  </div>
+
+  <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+    <div style="background:#fff; border:1px dashed #D0D5DD; border-radius:14px; padding:36px 24px; display:flex; flex-direction:column; gap:8px; align-items:center; text-align:center">
+      <span style="font-size:15px; font-weight:700">No interviews yet</span>
+      <span style="max-width:460px; font-size:13px; line-height:1.55; color:#667085; text-wrap:pretty">In the questionnaire, press "Send to sheet" after each interview. Responses show up here after the next sync.</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ viewQ }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex; flex-direction:column; gap:14px">
+      <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+        <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; overflow:hidden">
+          <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid #F1F4F8">
+            <span style="width:26px; height:26px; border-radius:8px; background:#FFF4EC; color:#E2620F; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800">{{ sec.num }}</span>
+            <span style="flex:1; font-size:15px; font-weight:700">{{ sec.title }}</span>
+          </div>
+          <sc-for list="{{ sec.questions }}" as="q" hint-placeholder-count="3">
+            <div style="padding:16px 20px; border-bottom:1px solid #F1F4F8; display:flex; flex-direction:column; gap:10px">
+              <div style="display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap">
+                <span style="font-size:12px; font-weight:700; color:#98A2B3; min-width:26px; padding-top:1px">{{ q.id }}</span>
+                <span style="flex:1; min-width:240px; font-size:14px; font-weight:600; line-height:1.45; text-wrap:pretty">{{ q.text }}</span>
+                <span style="font-size:12px; font-weight:600; color:#667085">{{ q.countText }}</span>
+                <sc-if value="{{ q.hasRating }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:12px; font-weight:700; color:#8A5310; background:#FFEFD9; border-radius:99px; padding:2px 9px">{{ q.ratingText }}</span>
+                </sc-if>
+              </div>
+              <sc-if value="{{ q.hasRating }}" hint-placeholder-val="{{ false }}">
+                <div style="padding-left:36px; display:flex; align-items:flex-end; gap:4px; height:34px">
+                  <sc-for list="{{ q.dist }}" as="d" hint-placeholder-count="5">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:2px; width:26px">
+                      <div style="width:18px; height:{{ d.h }}; background:#E2620F; border-radius:3px 3px 0 0; opacity:0.85"></div>
+                      <span style="font-size:10px; color:#98A2B3">{{ d.n }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+              <div style="padding-left:36px; display:flex; flex-direction:column; gap:6px">
+                <sc-for list="{{ q.answers }}" as="a" hint-placeholder-count="2">
+                  <div style="display:flex; gap:10px; align-items:flex-start; background:#F7F8FA; border-radius:10px; padding:9px 12px">
+                    <span style="flex:0 0 120px; font-size:12px; font-weight:700; color:#344054; overflow:hidden; text-overflow:ellipsis; white-space:nowrap" title="{{ a.who }}">{{ a.who }}</span>
+                    <span style="flex:1; font-size:13px; line-height:1.5; color:#344054; white-space:pre-wrap; text-wrap:pretty">{{ a.text }}</span>
+                    <sc-if value="{{ a.hasRating }}" hint-placeholder-val="{{ false }}"><span style="flex:0 0 auto; font-size:11.5px; font-weight:700; color:#8A5310">{{ a.rating }}/5</span></sc-if>
+                  </div>
+                </sc-for>
+                <sc-if value="{{ q.none }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:#98A2B3">No answers yet</span></sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ viewP }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; flex-direction:column; gap:10px">
+      <sc-for list="{{ people }}" as="p" hint-placeholder-count="2">
+        <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; overflow:hidden">
+          <div onClick="{{ p.toggle }}" style="display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; flex-wrap:wrap" style-hover="background:#FAFBFC">
+            <span style="font-size:14px; font-weight:700">{{ p.name }}</span>
+            <span style="flex:1; font-size:12.5px; color:#667085">{{ p.meta }}</span>
+            <span style="font-size:12px; font-weight:600; color:#667085">{{ p.count }}</span>
+            <span style="font-size:13px; color:#98A2B3">{{ p.chev }}</span>
+          </div>
+          <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid #F1F4F8; padding:12px 16px; display:flex; flex-direction:column; gap:8px">
+              <sc-for list="{{ p.rows }}" as="r" hint-placeholder-count="3">
+                <div style="display:flex; gap:10px; font-size:13px; line-height:1.5">
+                  <span style="flex:0 0 32px; font-weight:700; color:#98A2B3">{{ r.id }}</span>
+                  <div style="flex:1; display:flex; flex-direction:column; gap:2px">
+                    <span style="font-size:12px; font-weight:600; color:#667085">{{ r.q }}</span>
+                    <span style="color:#101828; white-space:pre-wrap">{{ r.a }}</span>
+                  </div>
+                  <span style="flex:0 0 auto; font-size:11.5px; font-weight:700; color:#8A5310">{{ r.rating }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sheetUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Google Sheet&quot;}}">
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbz9DRUp9i5Of83tAJ5yUdiDwSNkqS5Xz9lqISzrP8KXde9AS68DKnPOWvkAZHbvLkMh/exec";
+
+class Component extends DCLogic {
+  state = { list: [], sync: "", view: "q", filter: "", open: {} };
+  url() { return (this.props.sheetUrl || SHEET_URL).trim(); }
+  componentDidMount() { this.sync(); this._iv = setInterval(() => this.sync(), 60000); }
+  componentWillUnmount() { clearInterval(this._iv); }
+  sync() {
+    const u = this.url(); if (!u) return;
+    this.setState({ sync: "Syncing…" });
+    fetch(u + (u.includes("?") ? "&" : "?") + "type=interview").then(r => r.json())
+      .then(list => this.setState({ list: Array.isArray(list) ? list.filter(x => x && x.answers) : [], sync: "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }))
+      .catch(() => this.setState({ sync: "Sync failed — update the Apps Script (see setup)" }));
+  }
+  renderVals() {
+    const s = this.state, L = s.list, f = s.filter.trim().toLowerCase();
+    const who = (x) => (x.info && x.info.name) || "Anonymous";
+    const qmap = new Map();
+    L.forEach(x => (x.answers || []).forEach(a => {
+      if (!qmap.has(a.id)) qmap.set(a.id, { id: a.id, section: a.section, text: a.question, items: [] });
+      qmap.get(a.id).items.push({ who: who(x) + (x.info && x.info.role ? " · " + x.info.role : ""), text: a.answer || "", rating: Number(a.rating) || 0 });
+    }));
+    const secMap = new Map();
+    Array.from(qmap.values()).sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true })).forEach(q => {
+      if (!secMap.has(q.section)) secMap.set(q.section, []);
+      const rated = q.items.filter(i => i.rating);
+      const answered = q.items.filter(i => i.text.trim());
+      const shown = answered.filter(i => !f || i.text.toLowerCase().includes(f) || i.who.toLowerCase().includes(f));
+      const counts = [1, 2, 3, 4, 5].map(n => rated.filter(i => i.rating === n).length), mx = Math.max(1, ...counts);
+      secMap.get(q.section).push({
+        id: q.id, text: q.text, countText: answered.length + " answer" + (answered.length === 1 ? "" : "s"),
+        hasRating: rated.length > 0, ratingText: rated.length ? "Avg " + (rated.reduce((a, i) => a + i.rating, 0) / rated.length).toFixed(1) + " / 5 · " + rated.length + " rated" : "",
+        dist: counts.map((c, i) => ({ n: i + 1, h: Math.round((c / mx) * 22) + 2 + "px" })),
+        answers: shown.map(i => ({ who: i.who, text: i.text, rating: i.rating, hasRating: !!i.rating })),
+        none: !shown.length
+      });
+    });
+    const sections = Array.from(secMap.entries()).map(([title, questions], i) => ({ num: i + 1, title, questions }));
+    const people = L.map(x => {
+      const open = !!s.open[x.sessionId], i = x.info || {};
+      const answered = (x.answers || []).filter(a => (a.answer || "").trim() || a.rating);
+      return { name: who(x), meta: [i.role, i.team, i.interviewer ? "by " + i.interviewer : "", i.date].filter(Boolean).join(" · "),
+        count: answered.length + " answered", open, chev: open ? "▾" : "▸",
+        toggle: () => this.setState(st => ({ open: { ...st.open, [x.sessionId]: !open } })),
+        rows: answered.map(a => ({ id: a.id, q: a.question, a: a.answer || "—", rating: a.rating ? a.rating + "/5" : "" })) };
+    });
+    const vs = (on) => "border-radius:99px; padding:6px 13px; font-size:12.5px; font-weight:600; cursor:pointer; border:1px solid " + (on ? "#E2620F" : "#E3E8EE") + "; background:" + (on ? "#FFF4EC" : "#fff") + "; color:" + (on ? "#B44B08" : "#475467");
+    return {
+      subText: L.length + " interview" + (L.length === 1 ? "" : "s") + " compiled from the shared Google Sheet",
+      syncText: s.sync, syncNow: () => this.sync(),
+      views: [{ label: "By question", go: () => this.setState({ view: "q" }), style: vs(s.view === "q") }, { label: "By participant", go: () => this.setState({ view: "p" }), style: vs(s.view === "p") }],
+      filter: s.filter, onFilter: (e) => this.setState({ filter: e.target.value }),
+      empty: !L.length, viewQ: s.view === "q" && L.length > 0, viewP: s.view === "p" && L.length > 0,
+      sections, people,
+      exportCsv: () => {
+        const esc = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+        const rows = [["Participant", "Role", "Team", "Interviewer", "Date", "Section", "ID", "Question", "Answer", "Rating"]];
+        L.forEach(x => { const i = x.info || {}; (x.answers || []).forEach(a => rows.push([i.name, i.role, i.team, i.interviewer, i.date, a.section, a.id, a.question, a.answer, a.rating])); });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([rows.map(r => r.map(esc).join(",")).join("\n")], { type: "text/csv" }));
+        a.download = "interview-responses.csv"; a.click();
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

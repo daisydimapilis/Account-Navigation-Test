@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#EEF1F5; font-family:Figtree, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; color:#101828; }
+  a { color:#E2620F; text-decoration:none; }
+  a:hover { color:#B44B08; text-decoration:underline; }
+  textarea, input, select { font-family:inherit; }
+</style>
+</helmet>
+<div style="max-width:980px; margin:0 auto; padding:32px 24px 64px; display:flex; flex-direction:column; gap:18px">
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+    <div style="display:flex; flex-direction:column; gap:4px">
+      <span style="font-size:11px; font-weight:800; letter-spacing:0.09em; color:#B44B08">UX RESEARCH · DIRECTORY</span>
+      <span style="font-size:24px; font-weight:800; letter-spacing:-0.02em">User interview questionnaire</span>
+      <span style="font-size:13px; color:#667085">Answers save in this browser as you type. Press "Send to sheet" to add them to the shared results. <a href="Interview Responses.dc.html">View all responses →</a></span>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap">
+      <button onClick="{{ newSession }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">+ New participant</button>
+      <button onClick="{{ sendSheet }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">{{ sendLabel }}</button>
+      <button onClick="{{ exportCsv }}" style="border:0; background:#E2620F; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer" style-hover="background:#C9550B">Export all (CSV)</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+    <sc-for list="{{ sessionTabs }}" as="t" hint-placeholder-count="1">
+      <button onClick="{{ t.go }}" style="{{ t.style }}">{{ t.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; padding:18px 20px; display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:14px; box-shadow:0 1px 2px rgba(16,24,40,.05)">
+    <sc-for list="{{ infoFields }}" as="f" hint-placeholder-count="5">
+      <label style="display:flex; flex-direction:column; gap:6px">
+        <span style="font-size:11.5px; font-weight:700; color:#475467">{{ f.label }}</span>
+        <input type="{{ f.type }}" value="{{ f.value }}" onChange="{{ f.onChange }}" placeholder="{{ f.ph }}" style="border:1px solid #E3E8EE; border-radius:9px; padding:9px 11px; font-size:13px; color:#101828; outline:none; background:#fff" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC" />
+      </label>
+    </sc-for>
+  </div>
+
+  <div style="display:flex; align-items:center; gap:12px; background:#fff; border:1px solid #E3E8EE; border-radius:12px; padding:12px 16px">
+    <span style="font-size:12.5px; font-weight:700; color:#344054; white-space:nowrap">{{ progressText }}</span>
+    <div style="flex:1; height:6px; background:#F1F3F6; border-radius:99px; overflow:hidden"><div style="height:100%; width:{{ progressPct }}; background:#E2620F; border-radius:99px"></div></div>
+  </div>
+
+  <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="3">
+    <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05)">
+      <div onClick="{{ sec.toggle }}" style="display:flex; align-items:center; gap:12px; padding:14px 20px; cursor:pointer; border-bottom:1px solid #F1F4F8" style-hover="background:#FAFBFC">
+        <span style="width:26px; height:26px; border-radius:8px; background:#FFF4EC; color:#E2620F; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800">{{ sec.num }}</span>
+        <span style="flex:1; font-size:15px; font-weight:700">{{ sec.title }}</span>
+        <span style="font-size:12px; font-weight:600; color:#667085">{{ sec.count }}</span>
+        <span style="font-size:13px; color:#98A2B3; width:14px; text-align:center">{{ sec.chev }}</span>
+      </div>
+      <sc-if value="{{ sec.open }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column">
+          <sc-for list="{{ sec.questions }}" as="q" hint-placeholder-count="3">
+            <div style="padding:16px 20px; border-bottom:1px solid #F1F4F8; display:flex; flex-direction:column; gap:10px">
+              <div style="display:flex; gap:10px; align-items:flex-start">
+                <span style="font-size:12px; font-weight:700; color:#98A2B3; min-width:26px; padding-top:1px; font-variant-numeric:tabular-nums">{{ q.id }}</span>
+                <span style="flex:1; font-size:14px; font-weight:600; line-height:1.45; text-wrap:pretty">{{ q.text }}</span>
+                <sc-if value="{{ q.answered }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px; font-weight:700; color:#186B3F; background:#E4F3E9; border-radius:99px; padding:2px 8px">Answered</span></sc-if>
+              </div>
+              <div style="padding-left:36px; display:flex; flex-direction:column; gap:10px">
+                <textarea value="{{ q.answer }}" onChange="{{ q.onAnswer }}" placeholder="Type the participant's answer…" rows="2" style="border:1px solid #E3E8EE; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.5; color:#101828; resize:vertical; outline:none; min-height:48px" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC"></textarea>
+                <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+                  <span style="font-size:11.5px; font-weight:600; color:#667085; margin-right:4px">{{ q.scaleLabel }}</span>
+                  <sc-for list="{{ q.ratings }}" as="r" hint-placeholder-count="5">
+                    <button onClick="{{ r.go }}" title="{{ r.title }}" style="{{ r.style }}">{{ r.n }}</button>
+                  </sc-for>
+                  <span style="font-size:11.5px; color:#98A2B3; margin-left:4px">{{ q.ratingHint }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-for>
+
+  <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05)">
+    <div style="display:flex; align-items:center; gap:12px; padding:14px 20px; border-bottom:1px solid #F1F4F8">
+      <span style="width:26px; height:26px; border-radius:8px; background:#101828; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12.5px; font-weight:800">T</span>
+      <span style="flex:1; font-size:15px; font-weight:700">Observed tasks</span>
+      <span style="font-size:12px; font-weight:600; color:#667085">{{ taskCount }}</span>
+    </div>
+    <div style="padding:10px 20px 0; font-size:12.5px; color:#667085">Watch without guiding. Record the outcome, time, and any wrong clicks or wrong-site picks.</div>
+    <sc-for list="{{ tasks }}" as="t" hint-placeholder-count="5">
+      <div style="padding:16px 20px; border-bottom:1px solid #F1F4F8; display:flex; flex-direction:column; gap:12px">
+        <div style="display:flex; gap:10px; align-items:flex-start">
+          <span style="font-size:12px; font-weight:700; color:#98A2B3; min-width:26px; padding-top:1px">{{ t.id }}</span>
+          <span style="flex:1; font-size:14px; font-weight:600; line-height:1.45; text-wrap:pretty">{{ t.text }}</span>
+        </div>
+        <div style="padding-left:36px; display:flex; flex-direction:column; gap:12px">
+          <div style="display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end">
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <span style="font-size:11.5px; font-weight:700; color:#475467">Outcome</span>
+              <div style="display:flex; gap:0; border:1px solid #E3E8EE; border-radius:9px; overflow:hidden">
+                <sc-for list="{{ t.outcomes }}" as="o" hint-placeholder-count="3">
+                  <button onClick="{{ o.go }}" style="{{ o.style }}">{{ o.label }}</button>
+                </sc-for>
+              </div>
+            </div>
+            <label style="display:flex; flex-direction:column; gap:6px">
+              <span style="font-size:11.5px; font-weight:700; color:#475467">Time (sec)</span>
+              <input type="number" min="0" value="{{ t.time }}" onChange="{{ t.onTime }}" style="width:90px; border:1px solid #E3E8EE; border-radius:9px; padding:8px 10px; font-size:13px; outline:none" style-focus="border-color:#E2620F" />
+            </label>
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <span style="font-size:11.5px; font-weight:700; color:#475467">Wrong clicks</span>
+              <div style="display:flex; align-items:center; border:1px solid #E3E8EE; border-radius:9px; overflow:hidden">
+                <button onClick="{{ t.dec }}" style="width:32px; height:34px; border:0; background:#fff; font-size:15px; color:#475467; cursor:pointer" style-hover="background:#F7F8FA">−</button>
+                <span style="min-width:30px; text-align:center; font-size:13px; font-weight:700; font-variant-numeric:tabular-nums">{{ t.clicks }}</span>
+                <button onClick="{{ t.inc }}" style="width:32px; height:34px; border:0; background:#fff; font-size:15px; color:#475467; cursor:pointer" style-hover="background:#F7F8FA">+</button>
+              </div>
+            </div>
+            <button onClick="{{ t.toggleWrong }}" style="{{ t.wrongStyle }}">{{ t.wrongLabel }}</button>
+          </div>
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap">
+            <span style="font-size:11.5px; font-weight:600; color:#667085; margin-right:4px">Ease (1 very hard – 5 very easy)</span>
+            <sc-for list="{{ t.ratings }}" as="r" hint-placeholder-count="5">
+              <button onClick="{{ r.go }}" style="{{ r.style }}">{{ r.n }}</button>
+            </sc-for>
+          </div>
+          <textarea value="{{ t.notes }}" onChange="{{ t.onNotes }}" placeholder="What did they say or do?" rows="2" style="border:1px solid #E3E8EE; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.5; resize:vertical; outline:none" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC"></textarea>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap">
+    <button onClick="{{ deleteSession }}" style="border:0; background:transparent; padding:8px 4px; font-size:13px; font-weight:600; color:#B42318; cursor:pointer">Delete this participant</button>
+    <span style="font-size:12px; color:#98A2B3">{{ savedText }}</span>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const SECTIONS = [
+  { title: "Context & goals", scale: "Confidence", qs: [
+    "What's your role, and how often do you use the directory?",
+    "Think of the last time you opened it. What were you trying to get done?",
+    "Which do you work with most: accounts, companies or sites?",
+    "Roughly how many sites do you manage or look at in a typical week?"] },
+  { title: "Finding a record", scale: "Ease", qs: [
+    "When you need a site, what do you usually know about it first: the name, code, account, location or something else?",
+    "Do you usually search, or browse through account › company › site?",
+    "What do you type into search? Show me.",
+    "When search doesn't find it, what do you do next?"] },
+  { title: "Telling similar sites apart", scale: "Confidence", qs: [
+    "Have you ever opened or edited the wrong site? What happened, and how did you notice?",
+    "When two sites have almost the same name, how do you tell them apart today?",
+    "Which detail do you trust most to confirm a site: the code, account, location or agent count?",
+    "Do you and your team use nicknames or short forms for sites (like \"QC\" for Quezon City)?"] },
+  { title: "Moving between sites", scale: "Ease", qs: [
+    "After finishing with one site, do you usually go to a sibling site, a site under a different account, or back to search?",
+    "How often do you compare two sites side by side?",
+    "Do you keep going back to the same few sites? Which ones, and why?",
+    "Would a \"recently viewed\" or \"favorites\" list change how you work?"] },
+  { title: "Sidebar & layout", scale: "Satisfaction", qs: [
+    "While working on a site, do you still need to see the list, or would you rather have more space?",
+    "When the sidebar collapsed, did you know how to get it back?",
+    "What would you want to see on the collapsed rail?"] },
+  { title: "Editing & confirming", scale: "Satisfaction", qs: [
+    "What changes do you usually make to a site?",
+    "Did the confirmation step feel helpful or slow you down? Which actions really need one?",
+    "Was typing the site code to remove it reasonable, or too much?"] },
+  { title: "Wrap-up", scale: "Overall", qs: [
+    "What's the most frustrating part of finding or managing sites today?",
+    "If you could change one thing about this page, what would it be?"] }
+];
+const TASKS = [
+  "Find Bread Plant under Mega Canning Corp and edit it.",
+  "You're on Mega Sardines Plant. Go to another site under the same company.",
+  "Find Cebu Hub using only its location.",
+  "Remove site ST-10xx.",
+  "Go from a site back to its account's details."
+];
+const OUTCOMES = ["Completed", "With help", "Failed"];
+const KEY = "ux-questionnaire-directory-v1";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbz9DRUp9i5Of83tAJ5yUdiDwSNkqS5Xz9lqISzrP8KXde9AS68DKnPOWvkAZHbvLkMh/exec";
+const newId = () => "I-" + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2, 5).toUpperCase();
+const blank = () => ({ sid: newId(), info: { name: "", role: "", team: "", interviewer: "", date: new Date().toISOString().slice(0, 10) }, answers: {}, ratings: {}, tasks: {} });
+
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+    if (saved && saved.sessions) saved.sessions.forEach(x => { if (!x.sid) x.sid = newId(); });
+    this.state = saved && saved.sessions && saved.sessions.length ? { ...saved, open: {}, savedAt: "" } : { sessions: [blank()], cur: 0, open: {}, savedAt: "" };
+  }
+  persist() {
+    try { localStorage.setItem(KEY, JSON.stringify({ sessions: this.state.sessions, cur: this.state.cur })); } catch (e) {}
+  }
+  upd(fn) {
+    this.setState(s => {
+      const sessions = s.sessions.slice();
+      const cur = JSON.parse(JSON.stringify(sessions[s.cur]));
+      fn(cur);
+      sessions[s.cur] = cur;
+      return { sessions, sendState: {}, savedAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) };
+    }, () => this.persist());
+  }
+  exportCsv() {
+    const esc = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+    const rows = [["Participant", "Role", "Team", "Interviewer", "Date", "Section", "ID", "Question / Task", "Answer / Notes", "Rating", "Outcome", "Time (s)", "Wrong clicks", "Wrong site"]];
+    this.state.sessions.forEach(ss => {
+      const i = ss.info, base = [i.name, i.role, i.team, i.interviewer, i.date];
+      SECTIONS.forEach((sec, si) => sec.qs.forEach((q, qi) => {
+        const id = (si + 1) + "." + (qi + 1);
+        rows.push([...base, sec.title, id, q, ss.answers[id], ss.ratings[id], "", "", "", ""]);
+      }));
+      TASKS.forEach((t, ti) => {
+        const d = ss.tasks["T" + (ti + 1)] || {};
+        rows.push([...base, "Observed tasks", "T" + (ti + 1), t, d.notes, d.rating, d.outcome, d.time, d.clicks, d.wrong ? "Yes" : ""]);
+      });
+    });
+    const blob = new Blob([rows.map(r => r.map(esc).join(",")).join("\n")], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "ux-interviews-directory.csv"; a.click();
+  }
+  async sendSheet() {
+    const s = this.state, ss = s.sessions[s.cur], url = (this.props.sheetUrl || SHEET_URL).trim();
+    if (!url) return;
+    const answers = [];
+    SECTIONS.forEach((sec, si) => sec.qs.forEach((q, qi) => { const id = (si + 1) + "." + (qi + 1); answers.push({ section: sec.title, id, question: q, answer: ss.answers[id] || "", rating: ss.ratings[id] || "" }); }));
+    const tasks = TASKS.map((t, ti) => ({ id: "T" + (ti + 1), task: t, ...(ss.tasks["T" + (ti + 1)] || {}) }));
+    const body = { type: "interview", sessionId: ss.sid, info: ss.info, answers, tasks, sentAt: new Date().toISOString() };
+    const key = ss.sid;
+    this.setState(st => ({ sendState: { ...(st.sendState || {}), [key]: "sending" } }));
+    try { await fetch(url, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(body) }); this.setState(st => ({ sendState: { ...(st.sendState || {}), [key]: "sent" } })); }
+    catch (e) { this.setState(st => ({ sendState: { ...(st.sendState || {}), [key]: "failed" } })); }
+  }
+  renderVals() {
+    const s = this.state, ss = s.sessions[s.cur];
+    const sendSt = (s.sendState || {})[ss.sid];
+    const rateBtn = (on) => "width:32px; height:32px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; border:1px solid " + (on ? "#E2620F" : "#E3E8EE") + "; background:" + (on ? "#E2620F" : "#fff") + "; color:" + (on ? "#fff" : "#475467");
+    const hints = { Confidence: "1 not sure – 5 very sure", Ease: "1 very hard – 5 very easy", Satisfaction: "1 unhappy – 5 very happy", Overall: "1 poor – 5 great" };
+    let total = 0, done = 0;
+    const sections = SECTIONS.map((sec, si) => {
+      let n = 0;
+      const questions = sec.qs.map((text, qi) => {
+        const id = (si + 1) + "." + (qi + 1), answer = ss.answers[id] || "", rating = ss.ratings[id];
+        const answered = !!answer.trim() || !!rating;
+        total++; if (answered) { done++; n++; }
+        return {
+          id, text, answer, answered, scaleLabel: sec.scale, ratingHint: hints[sec.scale],
+          onAnswer: (e) => { const v = e.target.value; this.upd(c => { c.answers[id] = v; }); },
+          ratings: [1, 2, 3, 4, 5].map(k => ({ n: k, title: sec.scale + " " + k, style: rateBtn(rating === k), go: () => this.upd(c => { c.ratings[id] = c.ratings[id] === k ? null : k; }) }))
+        };
+      });
+      const open = s.open[si] !== false;
+      return { num: si + 1, title: sec.title, count: n + " / " + sec.qs.length, open, chev: open ? "▾" : "▸", questions,
+        toggle: () => this.setState(st => ({ open: { ...st.open, [si]: !open ? true : false } })) };
+    });
+    let tdone = 0;
+    const tasks = TASKS.map((text, ti) => {
+      const id = "T" + (ti + 1), d = ss.tasks[id] || {};
+      if (d.outcome) tdone++;
+      const setT = (patch) => this.upd(c => { c.tasks[id] = { ...(c.tasks[id] || {}), ...patch(c.tasks[id] || {}) }; });
+      const oc = { Completed: ["#E4F3E9", "#186B3F"], "With help": ["#FFEFD9", "#8A5310"], Failed: ["#FEF3F2", "#B42318"] };
+      return {
+        id, text, time: d.time ?? "", clicks: d.clicks || 0, notes: d.notes || "",
+        outcomes: OUTCOMES.map((o, oi) => ({ label: o, go: () => setT(x => ({ outcome: x.outcome === o ? null : o })),
+          style: "border:0; padding:8px 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; border-left:" + (oi ? "1px solid #E3E8EE" : "0") + "; background:" + (d.outcome === o ? oc[o][0] : "#fff") + "; color:" + (d.outcome === o ? oc[o][1] : "#475467") })),
+        onTime: (e) => { const v = e.target.value; setT(() => ({ time: v })); },
+        inc: () => setT(x => ({ clicks: (x.clicks || 0) + 1 })),
+        dec: () => setT(x => ({ clicks: Math.max(0, (x.clicks || 0) - 1) })),
+        toggleWrong: () => setT(x => ({ wrong: !x.wrong })),
+        wrongLabel: d.wrong ? "⚠ Picked wrong site" : "Picked wrong site?",
+        wrongStyle: "height:36px; border-radius:9px; padding:0 12px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; border:1px solid " + (d.wrong ? "#F6E3C4" : "#E3E8EE") + "; background:" + (d.wrong ? "#FFFAF2" : "#fff") + "; color:" + (d.wrong ? "#8A5310" : "#667085"),
+        onNotes: (e) => { const v = e.target.value; setT(() => ({ notes: v })); },
+        ratings: [1, 2, 3, 4, 5].map(k => ({ n: k, style: rateBtn(d.rating === k), go: () => setT(x => ({ rating: x.rating === k ? null : k })) }))
+      };
+    });
+    const f = (key, label, ph, type) => ({ label, ph, type: type || "text", value: ss.info[key] || "", onChange: (e) => { const v = e.target.value; this.upd(c => { c.info[key] = v; }); } });
+    const pct = Math.round(((done + tdone) / (total + TASKS.length)) * 100);
+    return {
+      infoFields: [f("name", "Participant", "Name or ID"), f("role", "Role", "e.g. Site supervisor"), f("team", "Team / account", "e.g. Suntory ops"), f("interviewer", "Interviewer", "Your name"), f("date", "Date", "", "date")],
+      sessionTabs: s.sessions.map((x, i) => ({
+        label: (x.info.name || "Participant " + (i + 1)),
+        go: () => this.setState({ cur: i }, () => this.persist()),
+        style: "border-radius:99px; padding:6px 13px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; border:1px solid " + (i === s.cur ? "#E2620F" : "#E3E8EE") + "; background:" + (i === s.cur ? "#FFF4EC" : "#fff") + "; color:" + (i === s.cur ? "#B44B08" : "#475467")
+      })),
+      newSession: () => this.setState(st => ({ sessions: [...st.sessions, blank()], cur: st.sessions.length }), () => this.persist()),
+      deleteSession: () => {
+        if (!confirm("Delete this participant's answers?")) return;
+        this.setState(st => { const arr = st.sessions.filter((_, i) => i !== st.cur); return { sessions: arr.length ? arr : [blank()], cur: Math.max(0, st.cur - 1) }; }, () => this.persist());
+      },
+      exportCsv: () => this.exportCsv(),
+      sendSheet: () => this.sendSheet(),
+      sendLabel: sendSt === "sending" ? "Sending…" : sendSt === "sent" ? "✓ Sent to sheet" : sendSt === "failed" ? "Send failed — retry" : "Send to sheet",
+      progressText: (done + tdone) + " of " + (total + TASKS.length) + " answered",
+      progressPct: pct + "%",
+      sections, tasks, taskCount: tdone + " / " + TASKS.length,
+      savedText: s.savedAt ? "Saved " + s.savedAt : "Autosaves as you type"
+    };
+  }
+}
+</script>
+</body>
+</html>
