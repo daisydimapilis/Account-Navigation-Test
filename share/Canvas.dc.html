@@ -47,7 +47,6 @@
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
             <span style="font-size:15.5px; font-weight:700; letter-spacing:-0.01em">Directory</span>
             <div style="display:flex; align-items:center; gap:6px">
-              <button onClick="{{ toggleKeep }}" title="{{ keepTitle }}" style="{{ keepStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"></path><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"></path></svg></button>
               <button onClick="{{ collapseSide }}" title="Collapse directory" style="width:28px; height:28px; border-radius:8px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg></button>
               <span style="width:28px; height:28px; border-radius:8px; background:#FFF4EC; color:#E2620F; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600">+</span>
             </div>
@@ -455,7 +454,7 @@ class Component extends DCLogic {
       (fA ? [fA] : DATA).forEach(p => (fC ? [fC] : p.companies).forEach(cc => cc.sites.forEach(x => scopeRows.push({
         id: p.id + cc.id + x.name, name: x.name, initials: x.initials, bg: x.bg, fg: x.fg,
         meta: p.name + " › " + cc.name,
-        go: () => this.setState({ scopeSel: p.id + cc.id + x.name, collapsed: !this.state.keepOpen })
+        go: () => this.setState({ scopeSel: p.id + cc.id + x.name })
       }))));
     }
 
@@ -486,7 +485,7 @@ class Component extends DCLogic {
           if (hits(x.name, x.code)) found[2].push({ key: sk, ...split(x.name), initials: x.initials, bg: x.bg, fg: x.fg, type: "Site",
             code: x.code, hasCode: true, meta: p.name + " › " + cc.name, meta2: x.meta, hasMeta2: true,
             similar: sim > 0, norm: normName(x.name), similarText: sim ? "Similar to " + simL[0].x.name + " (" + simL[0].reason + ")" + (sim > 1 ? " +" + (sim - 1) + " more" : "") + " — check the code" : "",
-            go: () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: p.id + cc.id + x.name, pinned: pin(p.id, cc.id, p.id + cc.id + x.name), collapsed: !this.state.keepOpen, broad: [false, false, false] }) });
+            go: () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: p.id + cc.id + x.name, pinned: pin(p.id, cc.id, p.id + cc.id + x.name), broad: [false, false, false] }) });
         });
       });
     });
@@ -528,7 +527,7 @@ class Component extends DCLogic {
     const uniq = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
     const selAcct = (p) => () => this.setState({ q: "", submitted: "", scope: 0, filterAcct: p.id, filterComp: null, scopeSel: p.id, pinned: pin(p.id) });
     const selComp = (p, cc) => () => this.setState({ q: "", submitted: "", scope: 1, filterAcct: p.id, filterComp: cc.id, scopeSel: cc.id, pinned: pin(p.id, cc.id) });
-    const selSite = (p, cc, x) => () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: p.id + cc.id + x.name, pinned: pin(p.id, cc.id, p.id + cc.id + x.name), collapsed: !this.state.keepOpen });
+    const selSite = (p, cc, x) => () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: p.id + cc.id + x.name, pinned: pin(p.id, cc.id, p.id + cc.id + x.name) });
     const crumbStyle = (last) => "font-size:12px; font-weight:600; cursor:" + (last ? "default" : "pointer") + "; color:" + (last ? "#101828" : "#667085");
     let prof = null;
     DATA.forEach(p => {
