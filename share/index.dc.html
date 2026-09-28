@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#EEF1F5; font-family:Figtree, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; color:#101828; }
+  a { color:#E2620F; text-decoration:none; }
+  a:hover { color:#B44B08; text-decoration:underline; }
+  textarea, input, button { font-family:inherit; }
+</style>
+</helmet>
+<div style="height:100vh; display:flex; flex-direction:column; overflow:hidden">
+  <sc-if value="{{ running }}" hint-placeholder-val="{{ false }}">
+    <div style="flex:0 0 auto; background:#101828; color:#fff; padding:12px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+      <span style="font-size:11px; font-weight:800; letter-spacing:0.09em; color:#FDBA8C; white-space:nowrap">{{ stepLabel }}</span>
+      <span style="flex:1; min-width:240px; font-size:15px; font-weight:700; line-height:1.4; text-wrap:pretty">{{ cur.text }}</span>
+      <div style="display:flex; gap:8px">
+        <button onClick="{{ skipTask }}" style="border:1px solid #475467; background:transparent; border-radius:9px; padding:8px 13px; font-size:13px; font-weight:600; color:#D0D5DD; cursor:pointer" style-hover="background:#1D2939">Skip this task</button>
+        <button onClick="{{ saysDone }}" style="border:0; background:#E2620F; border-radius:9px; padding:8px 14px; font-size:13px; font-weight:700; color:#fff; cursor:pointer" style-hover="background:#C9550B">I'm done</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="position:relative; flex:1; min-height:0">
+    <sc-if value="{{ showFrame }}" hint-placeholder-val="{{ false }}">
+      <iframe key="{{ frameKey }}" ref="{{ frameRef }}" src="{{ frameSrc }}" onLoad="{{ onFrameLoad }}" style="position:absolute; inset:0; width:100%; height:100%; border:0; background:#EEF1F5"></iframe>
+    </sc-if>
+
+    <sc-if value="{{ phaseIntro }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; inset:0; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:56px 20px">
+        <div style="width:540px; max-width:100%; background:#fff; border:1px solid #E3E8EE; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:18px; box-shadow:0 1px 2px rgba(16,24,40,.05)">
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <span style="font-size:11px; font-weight:800; letter-spacing:0.09em; color:#B44B08">HELP US IMPROVE THE DIRECTORY</span>
+            <span style="font-size:24px; font-weight:800; letter-spacing:-0.02em">Try 5 short tasks</span>
+            <span style="font-size:14px; line-height:1.6; color:#475467; text-wrap:pretty">You'll use an early version of the Directory to find and manage sites. We're testing the design, not you — there are no wrong answers. It takes about 10 minutes.</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:13.5px; line-height:1.5; color:#344054">
+            <span>• A task appears in the bar at the top of the screen.</span>
+            <span>• Work as you normally would. Press <b>I'm done</b> when you think you've finished.</span>
+            <span>• If you're stuck, press <b>Skip this task</b>. That's useful to us too.</span>
+            <span>• We record what you click and open on this page. No other data is collected.</span>
+          </div>
+          <label style="display:flex; flex-direction:column; gap:6px">
+            <span style="font-size:11.5px; font-weight:700; color:#475467">Your name or ID</span>
+            <input value="{{ pName }}" onChange="{{ onPName }}" placeholder="e.g. Maria S. or P-07" style="border:1px solid #E3E8EE; border-radius:9px; padding:10px 12px; font-size:14px; outline:none" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC" />
+          </label>
+          <label style="display:flex; flex-direction:column; gap:6px">
+            <span style="font-size:11.5px; font-weight:700; color:#475467">Your role</span>
+            <input value="{{ pRole }}" onChange="{{ onPRole }}" placeholder="e.g. Site supervisor" style="border:1px solid #E3E8EE; border-radius:9px; padding:10px 12px; font-size:14px; outline:none" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC" />
+          </label>
+          <button onClick="{{ begin }}" style="{{ beginStyle }}">Begin</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ phaseBrief }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; background:rgba(16,24,40,.55); display:flex; align-items:center; justify-content:center; padding:24px">
+        <div style="width:500px; max-width:100%; background:#fff; border-radius:16px; padding:26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 20px 48px rgba(16,24,40,.25)">
+          <span style="font-size:11px; font-weight:800; letter-spacing:0.09em; color:#B44B08">{{ briefLabel }}</span>
+          <span style="font-size:22px; font-weight:800; line-height:1.3; letter-spacing:-0.02em; text-wrap:pretty">{{ cur.text }}</span>
+          <span style="font-size:13px; color:#667085">The task stays in the bar at the top while you work.</span>
+          <button onClick="{{ startTask }}" style="align-self:flex-end; border:0; background:#E2620F; border-radius:9px; padding:10px 18px; font-size:14px; font-weight:700; color:#fff; cursor:pointer" style-hover="background:#C9550B">Start</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ phaseRate }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; background:rgba(16,24,40,.55); display:flex; align-items:center; justify-content:center; padding:24px">
+        <div style="width:480px; max-width:100%; background:#fff; border-radius:16px; padding:26px; display:flex; flex-direction:column; gap:16px; box-shadow:0 20px 48px rgba(16,24,40,.25)">
+          <span style="font-size:20px; font-weight:800; letter-spacing:-0.01em">{{ rateTitle }}</span>
+          <div style="display:flex; flex-direction:column; gap:8px">
+            <span style="font-size:13.5px; font-weight:600; color:#344054">How easy was that?</span>
+            <div style="display:flex; gap:6px">
+              <sc-for list="{{ easeBtns }}" as="b" hint-placeholder-count="5">
+                <button onClick="{{ b.go }}" style="{{ b.style }}">{{ b.n }}</button>
+              </sc-for>
+            </div>
+            <div style="display:flex; justify-content:space-between; width:264px; font-size:11.5px; color:#98A2B3"><span>Very hard</span><span>Very easy</span></div>
+          </div>
+          <textarea value="{{ taskComment }}" onChange="{{ onTaskComment }}" rows="2" placeholder="Anything confusing? (optional)" style="border:1px solid #E3E8EE; border-radius:10px; padding:10px 12px; font-size:13px; line-height:1.5; resize:vertical; outline:none" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC"></textarea>
+          <button onClick="{{ nextTask }}" style="{{ nextStyle }}">{{ nextLabel }}</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ phaseEnd }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; inset:0; overflow:auto; display:flex; align-items:flex-start; justify-content:center; padding:56px 20px">
+        <div style="width:540px; max-width:100%; background:#fff; border:1px solid #E3E8EE; border-radius:16px; padding:28px; display:flex; flex-direction:column; gap:16px">
+          <sc-if value="{{ notSubmitted }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:16px">
+              <span style="font-size:22px; font-weight:800; letter-spacing:-0.02em">Last question</span>
+              <label style="display:flex; flex-direction:column; gap:6px">
+                <span style="font-size:13.5px; font-weight:600; color:#344054">If you could change one thing about this page, what would it be?</span>
+                <textarea value="{{ finalComment }}" onChange="{{ onFinalComment }}" rows="3" style="border:1px solid #E3E8EE; border-radius:10px; padding:10px 12px; font-size:13.5px; line-height:1.5; resize:vertical; outline:none" style-focus="border-color:#E2620F; box-shadow:0 0 0 3px #FFE3CC"></textarea>
+              </label>
+              <button onClick="{{ submit }}" style="align-self:flex-start; border:0; background:#E2620F; border-radius:10px; padding:11px 18px; font-size:14px; font-weight:700; color:#fff; cursor:pointer" style-hover="background:#C9550B">{{ submitLabel }}</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:14px">
+              <span style="font-size:22px; font-weight:800; letter-spacing:-0.02em">Thank you!</span>
+              <span style="font-size:14px; line-height:1.6; color:#475467; text-wrap:pretty">{{ thanksText }}</span>
+              <sc-if value="{{ needsManualSend }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; gap:8px; flex-wrap:wrap">
+                  <button onClick="{{ download }}" style="border:0; background:#E2620F; border-radius:9px; padding:10px 16px; font-size:13.5px; font-weight:700; color:#fff; cursor:pointer" style-hover="background:#C9550B">Download results file</button>
+                  <button onClick="{{ copy }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:10px 14px; font-size:13.5px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">{{ copyLabel }}</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;submitUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Results delivery&quot;}}">
+const TASKS = [
+  { id: "T1", text: "Find Bread Plant under Mega Canning Corp and edit it.",
+    target: (c) => c.toast.startsWith("Editing Bread Plant") && c.banner && c.banner.path.includes("Mega Canning Corp"),
+    wrong: (c) => c.banner && /^Bre?a?d Plant$/.test(c.banner.name) && !c.banner.path.includes("Mega Canning Corp") },
+  { id: "T2", text: "Open Mega Sardines Plant, then go to another site under the same company.",
+    target: (c) => c.seen.some(h => h.name === "Mega Sardines Plant") && c.banner && c.banner.isSite && c.banner.path.includes("Mega Canning Corp") && c.banner.name !== "Mega Sardines Plant",
+    wrong: (c) => c.banner && c.banner.name === "Mega Sardines Plant 2" },
+  { id: "T3", text: "Find the Cebu Hub site in Mandaue.",
+    target: (c) => c.banner && c.banner.name === "Cebu Hub",
+    wrong: (c) => c.banner && c.banner.name === "Cebu Mega Hub" },
+  { id: "T4", text: "Remove the site Cold Storage Depot.",
+    target: (c) => c.toast.startsWith("Removed Cold Storage Depot"),
+    wrong: (c) => c.toast.startsWith("Removed") && !c.toast.startsWith("Removed Cold Storage Depot") },
+  { id: "T5", text: "Open Mega Sardines Plant, then go back to its account's details.",
+    target: (c) => c.seen.some(h => h.name === "Mega Sardines Plant") && c.banner && c.banner.name === "Mega Foods International",
+    wrong: (c) => c.banner && !c.banner.isSite && c.banner.path === "Top-level account" && c.banner.name !== "Mega Foods International" && c.seen.some(h => h.name === "Mega Sardines Plant") }
+];
+const KEY = "ux-selfguided-directory-v1";
+const SUBMIT_URL = "https://script.google.com/macros/s/AKfycbz9DRUp9i5Of83tAJ5yUdiDwSNkqS5Xz9lqISzrP8KXde9AS68DKnPOWvkAZHbvLkMh/exec"; // Google Apps Script web app URL — results post here automatically
+
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    this.frameRef = React.createRef();
+    this.sid = "S-" + Date.now().toString(36).toUpperCase();
+    this.state = { phase: "intro", idx: 0, pName: "", pRole: "", results: [], run: null, frameKey: 0, ease: null, taskComment: "", finalComment: "", sent: null, copied: false };
+  }
+  componentWillUnmount() { clearInterval(this._iv); }
+  log(type, label) {
+    this.setState(st => st.run && st.run.ready ? { run: { ...st.run, events: [...st.run.events, { t: Math.round((Date.now() - st.run.start) / 100) / 10, type, label }] } } : null);
+  }
+  readFrame() {
+    const f = this.frameRef.current; let doc = null;
+    try { doc = f && f.contentDocument; } catch (e) {}
+    if (!doc) return null;
+    let banner = null;
+    const lab = Array.from(doc.querySelectorAll("span")).find(el => el.textContent.trim() === "YOU'RE MANAGING");
+    if (lab && lab.parentElement) {
+      const sp = lab.parentElement.querySelectorAll(":scope > span");
+      const path = sp[3] ? sp[3].textContent.trim() : "";
+      banner = { name: sp[1] ? sp[1].textContent.trim() : "", code: sp[2] ? sp[2].textContent.trim() : "", path, isSite: path.includes("›") };
+    }
+    const toastEl = doc.querySelector('[data-test="toast"]');
+    return { banner, toast: toastEl ? toastEl.textContent.trim() : "" };
+  }
+  tick() {
+    const s = this.state; if (s.phase !== "running" || !s.run || !s.run.ready) return;
+    const r = { ...s.run }, t = TASKS[s.idx], fr = this.readFrame() || { banner: null, toast: "" };
+    const now = Math.round((Date.now() - r.start) / 100) / 10;
+    if (fr.banner) {
+      const k = fr.banner.name + "|" + fr.banner.path;
+      if (k !== r.lastKey) { r.lastKey = k; r.seen = [...r.seen, fr.banner]; r.events = [...r.events, { t: now, type: "open", label: fr.banner.name + (fr.banner.code ? " (" + fr.banner.code + ")" : "") + " · " + fr.banner.path }]; }
+    }
+    if (fr.toast && fr.toast !== r.lastToast) { r.lastToast = fr.toast; r.events = [...r.events, { t: now, type: "action", label: fr.toast }]; }
+    const ctx = { ...fr, seen: r.seen };
+    try { if (t.wrong(ctx) && !r.wrongNow) { r.wrong = true; r.wrongNow = true; r.events = [...r.events, { t: now, type: "wrong", label: "Wrong record: " + (fr.banner ? fr.banner.name : fr.toast) }]; } else if (!t.wrong(ctx)) r.wrongNow = false; } catch (e) {}
+    let ok = false; try { ok = !!t.target(ctx); } catch (e) {}
+    if (ok) { r.events = [...r.events, { t: now, type: "success", label: "Target reached" }]; this.finish(r, "Completed", "auto"); return; }
+    if (r !== s.run) this.setState({ run: r });
+  }
+  finish(r, outcome, how) {
+    clearInterval(this._iv);
+    const res = { id: TASKS[this.state.idx].id, task: TASKS[this.state.idx].text, outcome, detectedBy: how, seconds: Math.round((Date.now() - r.start) / 1000), clicks: r.clicks, wrongSite: r.wrong, events: r.events };
+    const results = this.state.results.slice(); results[this.state.idx] = res;
+    this.setState({ phase: "rate", results, run: null, ease: null, taskComment: "" });
+  }
+  payload() {
+    const s = this.state;
+    return { sessionId: this.sid, participant: s.pName, role: s.pRole, date: new Date().toISOString(), device: navigator.userAgent, screen: window.innerWidth + "x" + window.innerHeight, finalComment: s.finalComment, tasks: s.results };
+  }
+  renderVals() {
+    const s = this.state, t = TASKS[s.idx] || TASKS[0];
+    const submitUrl = (this.props.submitUrl || SUBMIT_URL).trim();
+    const onLoad = () => {
+      const f = this.frameRef.current; if (!f) return;
+      const k = this.state.frameKey;
+      this.setState(st => st.run && !st.run.ready && st.frameKey === k ? { run: { ...st.run, ready: true, start: Date.now() } } : null);
+      try {
+        const d = f.contentDocument;
+        d.addEventListener("click", (e) => {
+          const el = e.target.closest("button, [onclick], div, span, input") || e.target;
+          const txt = (el.getAttribute && (el.getAttribute("title") || el.getAttribute("placeholder"))) || (el.innerText || "").trim().split("\n")[0];
+          this.setState(st => st.run ? { run: { ...st.run, clicks: st.run.clicks + 1 } } : null);
+          this.log("click", (txt || el.tagName.toLowerCase()).slice(0, 70));
+        }, true);
+        d.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.tagName === "INPUT") this.log("search", e.target.value); }, true);
+      } catch (e) {}
+    };
+    const ok = !!s.pName.trim();
+    const last = s.idx >= TASKS.length - 1;
+    const sendOk = s.sent === "ok";
+    return {
+      running: s.phase === "running",
+      stepLabel: "TASK " + (s.idx + 1) + " OF " + TASKS.length,
+      cur: { text: t.text },
+      showFrame: s.phase !== "intro" && s.phase !== "end",
+      frameKey: s.frameKey, frameRef: this.frameRef, frameSrc: "Canvas.dc.html?run=" + s.frameKey, onFrameLoad: onLoad,
+      phaseIntro: s.phase === "intro", phaseBrief: s.phase === "brief", phaseRate: s.phase === "rate", phaseEnd: s.phase === "end",
+      pName: s.pName, pRole: s.pRole,
+      onPName: (e) => this.setState({ pName: e.target.value }), onPRole: (e) => this.setState({ pRole: e.target.value }),
+      beginStyle: "align-self:flex-start; border:0; background:#E2620F; border-radius:10px; padding:11px 22px; font-size:14px; font-weight:700; color:#fff; cursor:" + (ok ? "pointer" : "not-allowed") + "; opacity:" + (ok ? "1" : "0.45"),
+      begin: () => ok && this.setState({ phase: "brief", frameKey: s.frameKey + 1 }),
+      briefLabel: "TASK " + (s.idx + 1) + " OF " + TASKS.length,
+      startTask: () => {
+        this.setState({ phase: "running", run: { ready: false, start: Date.now(), clicks: 0, wrong: false, wrongNow: false, seen: [], events: [], lastKey: "", lastToast: "" }, frameKey: s.frameKey + 1 });
+        clearInterval(this._iv); this._iv = setInterval(() => this.tick(), 300);
+      },
+      saysDone: () => this.finish(s.run, "Not reached", "participant"),
+      skipTask: () => this.finish(s.run, "Skipped", "participant"),
+      rateTitle: s.results[s.idx] && s.results[s.idx].outcome === "Skipped" ? "No problem — skipped." : "Thanks! One quick question.",
+      easeBtns: [1, 2, 3, 4, 5].map(n => ({ n, go: () => this.setState({ ease: n }),
+        style: "width:48px; height:44px; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer; border:1px solid " + (s.ease === n ? "#E2620F" : "#E3E8EE") + "; background:" + (s.ease === n ? "#E2620F" : "#fff") + "; color:" + (s.ease === n ? "#fff" : "#475467") })),
+      taskComment: s.taskComment, onTaskComment: (e) => this.setState({ taskComment: e.target.value }),
+      nextLabel: last ? "Finish" : "Next task",
+      nextStyle: "align-self:flex-end; border:0; background:#E2620F; border-radius:9px; padding:10px 18px; font-size:14px; font-weight:700; color:#fff; cursor:" + (s.ease ? "pointer" : "not-allowed") + "; opacity:" + (s.ease ? "1" : "0.45"),
+      nextTask: () => {
+        if (!s.ease) return;
+        const results = s.results.slice(); results[s.idx] = { ...results[s.idx], ease: s.ease, comment: s.taskComment };
+        this.setState(last ? { results, phase: "end" } : { results, phase: "brief", idx: s.idx + 1, frameKey: s.frameKey + 1 });
+      },
+      finalComment: s.finalComment, onFinalComment: (e) => this.setState({ finalComment: e.target.value }),
+      notSubmitted: !s.sent, submitted: !!s.sent,
+      submitLabel: s.sent === "sending" ? "Sending…" : "Submit",
+      submit: async () => {
+        const data = this.payload();
+        try { const all = JSON.parse(localStorage.getItem(KEY) || "[]"); all.push(data); localStorage.setItem(KEY, JSON.stringify(all)); } catch (e) {}
+        if (!submitUrl) { this.setState({ sent: "manual" }); return; }
+        this.setState({ sent: "sending" });
+        try { await fetch(submitUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain" }, body: JSON.stringify(data) }); this.setState({ sent: "ok" }); }
+        catch (e) { this.setState({ sent: "manual" }); }
+      },
+      needsManualSend: s.sent === "manual",
+      thanksText: sendOk ? "Your results have been sent. You can close this tab." : "Please download your results file and send it to the person who shared this test with you.",
+      download: () => {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(this.payload(), null, 2)], { type: "application/json" }));
+        a.download = "directory-test-" + (s.pName || "participant").replace(/\W+/g, "-").toLowerCase() + ".json"; a.click();
+      },
+      copyLabel: s.copied ? "✓ Copied" : "Copy results",
+      copy: () => { navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(this.payload())).then(() => this.setState({ copied: true })); }
+    };
+  }
+}
+</script>
+</body>
+</html>

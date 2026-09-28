@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#EEF1F5; font-family:Figtree, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; color:#101828; }
+  a { color:#E2620F; text-decoration:none; }
+  a:hover { color:#B44B08; text-decoration:underline; }
+  textarea, input, button { font-family:inherit; }
+</style>
+</helmet>
+<div style="max-width:1040px; margin:0 auto; padding:32px 24px 64px; display:flex; flex-direction:column; gap:18px">
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap">
+    <div style="display:flex; flex-direction:column; gap:4px">
+      <span style="font-size:11px; font-weight:800; letter-spacing:0.09em; color:#B44B08">SELF-GUIDED TEST · DIRECTORY</span>
+      <span style="font-size:24px; font-weight:800; letter-spacing:-0.02em">Test results</span>
+      <span style="font-size:13px; color:#667085">{{ subText }}</span>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center">
+      <sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+        <span style="font-size:12px; color:#667085">{{ syncText }}</span>
+        <button onClick="{{ syncNow }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">Sync now</button>
+      </sc-if>
+      <label style="border:0; background:#E2620F; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#fff; cursor:pointer">
+        Load result files
+        <input type="file" accept=".json,application/json" multiple="multiple" onChange="{{ onFiles }}" style="display:none" />
+      </label>
+      <button onClick="{{ exportCsv }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">Export CSV</button>
+      <button onClick="{{ clearAll }}" style="border:0; background:transparent; padding:9px 6px; font-size:13px; font-weight:600; color:#B42318; cursor:pointer">Clear</button>
+    </div>
+  </div>
+
+  <sc-if value="{{ empty }}" hint-placeholder-val="{{ true }}">
+    <div style="background:#fff; border:1px dashed #D0D5DD; border-radius:14px; padding:36px 24px; display:flex; flex-direction:column; gap:12px; align-items:center; text-align:center">
+      <span style="font-size:15px; font-weight:700">No results loaded yet</span>
+      <span style="max-width:460px; font-size:13px; line-height:1.55; color:#667085; text-wrap:pretty">Load the .json files participants sent you, or paste results below. Sessions run on this device are loaded automatically.</span>
+    </div>
+  </sc-if>
+
+  <div style="display:flex; gap:8px; align-items:flex-start">
+    <textarea value="{{ paste }}" onChange="{{ onPaste }}" rows="2" placeholder="Paste copied results here…" style="flex:1; border:1px solid #E3E8EE; border-radius:10px; padding:10px 12px; font-size:12.5px; font-family:ui-monospace, monospace; resize:vertical; outline:none; background:#fff" style-focus="border-color:#E2620F"></textarea>
+    <button onClick="{{ addPaste }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:10px 14px; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">Add</button>
+  </div>
+
+  <sc-if value="{{ hasData }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex; flex-direction:column; gap:18px">
+      <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; overflow:hidden">
+        <div style="display:grid; grid-template-columns:44px minmax(0, 1fr) 110px 90px 80px 90px 70px; gap:12px; padding:10px 16px; background:#F7F8FA; font-size:11px; font-weight:700; letter-spacing:0.04em; color:#667085">
+          <span>TASK</span><span></span><span>SUCCESS</span><span>AVG TIME</span><span>CLICKS</span><span>WRONG SITE</span><span>EASE</span>
+        </div>
+        <sc-for list="{{ taskRows }}" as="r" hint-placeholder-count="5">
+          <div style="display:grid; grid-template-columns:44px minmax(0, 1fr) 110px 90px 80px 90px 70px; gap:12px; align-items:center; padding:12px 16px; border-top:1px solid #F1F4F8; font-size:13px; font-variant-numeric:tabular-nums">
+            <span style="font-weight:700; color:#98A2B3">{{ r.id }}</span>
+            <span style="line-height:1.4; text-wrap:pretty">{{ r.text }}</span>
+            <div style="display:flex; flex-direction:column; gap:4px">
+              <span style="font-weight:700">{{ r.success }}</span>
+              <div style="height:5px; background:#F1F3F6; border-radius:99px; overflow:hidden"><div style="height:100%; width:{{ r.successPct }}; background:#2E9E5E"></div></div>
+            </div>
+            <span>{{ r.time }}</span>
+            <span>{{ r.clicks }}</span>
+            <span style="font-weight:600; color:{{ r.wrongColor }}">{{ r.wrong }}</span>
+            <span>{{ r.ease }}</span>
+          </div>
+        </sc-for>
+      </div>
+
+      <span style="font-size:15px; font-weight:700">Participants</span>
+      <sc-for list="{{ people }}" as="p" hint-placeholder-count="2">
+        <div style="background:#fff; border:1px solid #E3E8EE; border-radius:14px; overflow:hidden">
+          <div onClick="{{ p.toggle }}" style="display:flex; align-items:center; gap:12px; padding:14px 16px; cursor:pointer; flex-wrap:wrap" style-hover="background:#FAFBFC">
+            <span style="font-size:14px; font-weight:700">{{ p.name }}</span>
+            <span style="font-size:12.5px; color:#667085">{{ p.meta }}</span>
+            <div style="flex:1; display:flex; gap:5px; justify-content:flex-end; flex-wrap:wrap">
+              <sc-for list="{{ p.chips }}" as="c" hint-placeholder-count="5">
+                <span style="{{ c.style }}">{{ c.label }}</span>
+              </sc-for>
+            </div>
+            <span style="font-size:13px; color:#98A2B3">{{ p.chev }}</span>
+          </div>
+          <sc-if value="{{ p.open }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid #F1F4F8; padding:14px 16px; display:flex; flex-direction:column; gap:16px">
+              <sc-if value="{{ p.hasFinal }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:13px; line-height:1.5; color:#344054; background:#F7F8FA; border-radius:10px; padding:10px 12px">“{{ p.final }}”</div>
+              </sc-if>
+              <sc-for list="{{ p.tasks }}" as="t" hint-placeholder-count="5">
+                <div style="display:flex; flex-direction:column; gap:8px">
+                  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap">
+                    <span style="font-size:12px; font-weight:700; color:#98A2B3">{{ t.id }}</span>
+                    <span style="{{ t.outStyle }}">{{ t.outcome }}</span>
+                    <span style="font-size:12.5px; color:#475467">{{ t.meta }}</span>
+                  </div>
+                  <sc-if value="{{ t.hasComment }}" hint-placeholder-val="{{ false }}"><span style="font-size:12.5px; color:#344054; padding-left:30px">“{{ t.comment }}”</span></sc-if>
+                  <div style="margin-left:30px; border-left:2px solid #EEF1F5; padding-left:12px; display:flex; flex-direction:column; gap:3px">
+                    <sc-for list="{{ t.events }}" as="e" hint-placeholder-count="3">
+                      <div style="display:flex; gap:8px; font-size:12px; line-height:1.4">
+                        <span style="color:#98A2B3; min-width:42px; font-variant-numeric:tabular-nums">{{ e.t }}</span>
+                        <span style="{{ e.typeStyle }}">{{ e.type }}</span>
+                        <span style="color:#344054; min-width:0">{{ e.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;sheetUrl&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Google Sheet&quot;}}">
+const KEY = "ux-selfguided-directory-v1";
+const VKEY = "ux-selfguided-results-viewer-v1";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbz9DRUp9i5Of83tAJ5yUdiDwSNkqS5Xz9lqISzrP8KXde9AS68DKnPOWvkAZHbvLkMh/exec"; // same Google Apps Script web app URL used by the test
+const OC = { Completed: ["#E4F3E9", "#186B3F"], "Not reached": ["#FEF3F2", "#B42318"], Skipped: ["#F1F3F6", "#667085"] };
+const TC = { click: "#667085", search: "#17627A", open: "#50399C", action: "#8A5310", wrong: "#B42318", success: "#186B3F" };
+const fmt = (sec) => Math.floor(sec / 60) + ":" + String(Math.round(sec % 60)).padStart(2, "0");
+
+class Component extends DCLogic {
+  constructor(p) {
+    super(p);
+    let a = [], b = [];
+    try { a = JSON.parse(localStorage.getItem(KEY) || "[]"); } catch (e) {}
+    try { b = JSON.parse(localStorage.getItem(VKEY) || "[]"); } catch (e) {}
+    this.state = { sessions: this.merge([], [...a, ...b]), open: {}, paste: "", sync: "" };
+  }
+  sheetUrl() { return (this.props.sheetUrl || SHEET_URL).trim(); }
+  componentDidMount() { if (this.sheetUrl()) { this.syncSheet(); this._iv = setInterval(() => this.syncSheet(), 60000); } }
+  componentWillUnmount() { clearInterval(this._iv); }
+  syncSheet() {
+    const u = this.sheetUrl(); if (!u) return;
+    this.setState({ sync: "Syncing…" });
+    fetch(u).then(r => r.json()).then(list => { this.add(list); this.setState({ sync: "Synced " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) }); })
+      .catch(() => this.setState({ sync: "Sync failed — check the sheet URL" }));
+  }
+  merge(base, add) {
+    const m = new Map(base.map(x => [x.sessionId, x]));
+    add.filter(x => x && x.tasks).forEach(x => m.set(x.sessionId || Math.random().toString(36), x));
+    return Array.from(m.values()).sort((x, y) => String(y.date).localeCompare(String(x.date)));
+  }
+  add(list) {
+    this.setState(st => {
+      const sessions = this.merge(st.sessions, list);
+      try { localStorage.setItem(VKEY, JSON.stringify(sessions)); } catch (e) {}
+      return { sessions };
+    });
+  }
+  renderVals() {
+    const s = this.state, S = s.sessions;
+    const ids = ["T1", "T2", "T3", "T4", "T5"];
+    const taskRows = ids.map((id, i) => {
+      const rs = S.map(x => (x.tasks || [])[i]).filter(Boolean);
+      const n = rs.length, ok = rs.filter(r => r.outcome === "Completed").length;
+      const avg = (f) => n ? rs.reduce((a, r) => a + (f(r) || 0), 0) / n : 0;
+      const eases = rs.filter(r => r.ease);
+      const wr = rs.filter(r => r.wrongSite).length;
+      return { id, text: rs[0] ? rs[0].task : "", success: n ? ok + "/" + n : "–", successPct: (n ? Math.round(ok / n * 100) : 0) + "%",
+        time: n ? fmt(avg(r => r.seconds)) : "–", clicks: n ? avg(r => r.clicks).toFixed(1) : "–",
+        wrong: n ? String(wr) : "–", wrongColor: wr ? "#B42318" : "#98A2B3",
+        ease: eases.length ? (eases.reduce((a, r) => a + r.ease, 0) / eases.length).toFixed(1) : "–" };
+    });
+    const people = S.map(x => {
+      const open = !!s.open[x.sessionId];
+      return {
+        name: x.participant || "Anonymous", open, chev: open ? "▾" : "▸",
+        meta: [x.role, x.date ? new Date(x.date).toLocaleString([], { dateStyle: "medium", timeStyle: "short" }) : ""].filter(Boolean).join(" · "),
+        chips: (x.tasks || []).map(r => { const c = OC[r.outcome] || OC.Skipped; return { label: r.id + (r.wrongSite ? " ⚠" : ""), style: "font-size:11px; font-weight:700; border-radius:99px; padding:3px 8px; background:" + c[0] + "; color:" + c[1] }; }),
+        toggle: () => this.setState(st => ({ open: { ...st.open, [x.sessionId]: !open } })),
+        hasFinal: !!(x.finalComment || "").trim(), final: x.finalComment,
+        tasks: (x.tasks || []).map(r => { const c = OC[r.outcome] || OC.Skipped; return {
+          id: r.id, outcome: r.outcome, outStyle: "font-size:11.5px; font-weight:700; border-radius:99px; padding:2px 9px; background:" + c[0] + "; color:" + c[1],
+          meta: fmt(r.seconds || 0) + " · " + (r.clicks || 0) + " clicks" + (r.wrongSite ? " · opened wrong record" : "") + (r.ease ? " · ease " + r.ease + "/5" : ""),
+          hasComment: !!(r.comment || "").trim(), comment: r.comment,
+          events: (r.events || []).map(e => ({ t: e.t + "s", type: e.type, label: e.label, typeStyle: "min-width:52px; font-weight:700; color:" + (TC[e.type] || "#667085") }))
+        }; })
+      };
+    });
+    const nOk = S.reduce((a, x) => a + (x.tasks || []).filter(r => r.outcome === "Completed").length, 0);
+    const nAll = S.reduce((a, x) => a + (x.tasks || []).length, 0);
+    return {
+      subText: S.length ? S.length + " participant" + (S.length > 1 ? "s" : "") + " · " + nOk + " of " + nAll + " tasks completed" : "Load participant results to see how people navigate",
+      hasSheet: !!this.sheetUrl(), syncText: s.sync || "Auto-syncs every minute", syncNow: () => this.syncSheet(),
+      empty: !S.length, hasData: !!S.length, taskRows, people,
+      onFiles: (e) => {
+        const files = Array.from(e.target.files || []);
+        Promise.all(files.map(f => f.text().then(t => { try { const j = JSON.parse(t); return Array.isArray(j) ? j : [j]; } catch (er) { return []; } }))).then(arr => this.add(arr.flat()));
+        e.target.value = "";
+      },
+      paste: s.paste, onPaste: (e) => this.setState({ paste: e.target.value }),
+      addPaste: () => { try { const j = JSON.parse(s.paste); this.add(Array.isArray(j) ? j : [j]); this.setState({ paste: "" }); } catch (e) { alert("That doesn't look like a results file."); } },
+      clearAll: () => { if (!confirm("Remove all loaded results from this viewer?")) return; try { localStorage.removeItem(VKEY); } catch (e) {} this.setState({ sessions: [] }); },
+      exportCsv: () => {
+        const esc = (v) => '"' + String(v ?? "").replace(/"/g, '""') + '"';
+        const rows = [["Session", "Participant", "Role", "Date", "Task", "Outcome", "Seconds", "Clicks", "Wrong site", "Ease", "Task comment", "Events", "Final comment"]];
+        S.forEach(x => (x.tasks || []).forEach(r => rows.push([x.sessionId, x.participant, x.role, x.date, r.id, r.outcome, r.seconds, r.clicks, r.wrongSite ? "Yes" : "No", r.ease, r.comment, (r.events || []).map(e => e.t + "s " + e.type + ": " + e.label).join(" | "), x.finalComment])));
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(new Blob([rows.map(r => r.map(esc).join(",")).join("\n")], { type: "text/csv" }));
+        a.download = "directory-test-results.csv"; a.click();
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

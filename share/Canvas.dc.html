@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  body { margin:0; background:#EEF1F5; font-family:Figtree, ui-sans-serif, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  a { color:#E2620F; text-decoration:none; }
+  a:hover { color:#B44B08; text-decoration:underline; }
+</style>
+</helmet>
+
+<section style="padding:40px; display:flex; flex-direction:column; gap:26px; color:#101828">
+  <div style="display:flex; flex-wrap:wrap; gap:24px; align-items:flex-start">
+    <div id="1b" style="display:flex; flex-direction:column; gap:12px; width:1180px; max-width:100%">
+      <div style="display:flex; align-items:center; gap:9px">
+        <span style="font-size:11px; font-weight:800; letter-spacing:0.06em; color:#fff; background:#101828; border-radius:6px; padding:3px 8px">1B</span>
+        <span style="font-size:15px; font-weight:700; letter-spacing:-0.01em">Scope toggle + context chip</span>
+      </div>
+      <p style="margin:0; max-width:640px; font-size:13px; line-height:1.55; color:#475467; text-wrap:pretty">A segmented control picks the level; the list stays flat and each row shows its parent path. Selecting a parent adds a removable filter chip. Best for jumping sideways — "show me every site" is one tap. The search bar looks across all three levels at once; the toggle then narrows results to one level. Selecting any row opens its profile on the right.</p>
+      <div style="display:flex; gap:16px; align-items:stretch">
+      <div style="{{ sideStyle }}">
+        <sc-if value="{{ railOn }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:10px; padding:12px 0">
+            <button onClick="{{ expandSide }}" title="Expand directory" style="width:36px; height:36px; border-radius:9px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"></path></svg></button>
+            <button onClick="{{ expandSearch }}" title="Search" style="width:36px; height:36px; border-radius:9px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></button>
+            <div style="width:28px; height:1px; background:#EEF1F5; margin:4px 0"></div>
+            <sc-for list="{{ railItems }}" as="ri" hint-placeholder-count="3">
+              <div onClick="{{ ri.go }}" title="{{ ri.title }}" style="display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; width:100%; padding:4px 0; box-shadow:{{ ri.edge }}">
+                <div style="{{ ri.avatarStyle }}">{{ ri.initials }}</div>
+                <span style="font-size:9.5px; font-weight:700; color:{{ ri.labelColor }}; font-variant-numeric:tabular-nums; letter-spacing:0.02em">{{ ri.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ sideOpen }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:14px 14px 12px; display:flex; flex-direction:column; gap:11px; border-bottom:1px solid #F1F4F8">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px">
+            <span style="font-size:15.5px; font-weight:700; letter-spacing:-0.01em">Directory</span>
+            <div style="display:flex; align-items:center; gap:6px">
+              <button onClick="{{ toggleKeep }}" title="{{ keepTitle }}" style="{{ keepStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5"></path><path d="M9 3h6l-1 6 3 3v2H7v-2l3-3-1-6z"></path></svg></button>
+              <button onClick="{{ collapseSide }}" title="Collapse directory" style="width:28px; height:28px; border-radius:8px; border:1px solid #E3E8EE; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0" style-hover="background:#F7F8FA"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#475467" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"></path></svg></button>
+              <span style="width:28px; height:28px; border-radius:8px; background:#FFF4EC; color:#E2620F; display:flex; align-items:center; justify-content:center; font-size:15px; font-weight:600">+</span>
+            </div>
+          </div>
+          <div style="{{ searchBoxStyle }}">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#667085" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+            <input value="{{ q }}" onChange="{{ onQ }}" onKeyDown="{{ onQKey }}" onFocus="{{ onQFocus }}" onBlur="{{ onQBlur }}" placeholder="Search accounts, companies, sites" style="flex:1; min-width:0; border:0; outline:none; background:transparent; font-family:inherit; font-size:13px; color:#101828; padding:0" />
+            <sc-if value="{{ hasQ }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ clearQ }}" aria-label="Clear search" style="flex:0 0 auto; width:20px; height:20px; border:0; border-radius:99px; background:#E7EBF0; color:#475467; font-family:inherit; font-size:10px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0">✕</button>
+            </sc-if>
+          </div>
+          <sc-if value="{{ pending }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; gap:6px; margin-top:-4px; font-size:11.5px; color:#667085">Press <span style="font-size:10.5px; font-weight:700; color:#475467; background:#F1F3F6; border:1px solid #E3E8EE; border-radius:4px; padding:1px 5px">Enter</span> to search</div>
+          </sc-if>
+          <div style="display:flex; gap:3px; background:#F2F4F7; border-radius:10px; padding:3px">
+            <sc-for list="{{ scopes }}" as="s" hint-placeholder-count="3">
+              <button onClick="{{ s.select }}" style="{{ s.style }}">{{ s.label }}<span style="{{ s.countStyle }}">{{ s.count }}</span></button>
+            </sc-for>
+          </div>
+          <sc-if value="{{ showFilter }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; gap:7px; align-self:flex-start; background:#FFF4EC; border:1px solid #FBD9BC; border-radius:99px; padding:5px 8px 5px 11px; font-size:12px; font-weight:600; color:#B44B08">
+              <span>{{ filterLabel }}</span>
+              <button onClick="{{ clearFilter }}" style="border:0; background:transparent; color:#B44B08; cursor:pointer; font-family:inherit; font-size:13px; line-height:1; padding:0 2px">✕</button>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ showPath }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; overflow:auto; padding:10px 10px 12px; display:flex; flex-direction:column; gap:4px">
+            <div style="display:flex; align-items:center; justify-content:space-between; padding:2px 6px 6px">
+              <span style="font-size:10.5px; font-weight:800; letter-spacing:0.09em; color:#667085">{{ pathLabel }}</span>
+              <sc-if value="{{ canClear }}" hint-placeholder-val="{{ true }}"><span onClick="{{ clearPin }}" style="font-size:12px; font-weight:600; color:#E2620F; cursor:pointer">Clear</span></sc-if>
+              <sc-if value="{{ canNarrow }}" hint-placeholder-val="{{ false }}"><span onClick="{{ narrowPin }}" style="font-size:12px; font-weight:600; color:#E2620F; cursor:pointer">Selected only</span></sc-if>
+            </div>
+            <sc-for list="{{ pathRows }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex; flex-direction:column; gap:4px">
+                <div onClick="{{ r.go }}" style="{{ r.style }}">
+                  <div style="{{ r.avatarStyle }}">{{ r.initials }}</div>
+                  <div style="flex:1; min-width:0">
+                    <div style="font-size:13.5px; font-weight:600; color:#101828; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.name }}</div>
+                    <div style="font-size:11.5px; color:#667085; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.meta }}</div>
+                  </div>
+                </div>
+              </div>
+            </sc-for>
+            <sc-if value="{{ showPathEmpty }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:28px 12px; text-align:center; font-size:12.5px; line-height:1.5; color:#667085; text-wrap:pretty">{{ pathEmptyText }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showIdle }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:24px 28px; text-align:center">
+            <div style="width:44px; height:44px; border-radius:12px; background:#F2F4F7; display:flex; align-items:center; justify-content:center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667085" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.2-3.2"></path></svg>
+            </div>
+            <span style="font-size:14px; font-weight:700; color:#101828">Search to find a record</span>
+            <span style="font-size:12.5px; line-height:1.5; color:#667085; text-wrap:pretty">Type an account, company or site name — or a code like 580111 — then press Enter.</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ neverTrue }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; overflow:auto; padding:8px; display:flex; flex-direction:column; gap:3px">
+            <sc-for list="{{ scopeRows }}" as="r" hint-placeholder-count="5">
+              <div onClick="{{ r.go }}" style="{{ r.style }}">
+                <div style="{{ r.avatarStyle }}">{{ r.initials }}</div>
+                <div style="flex:1; min-width:0">
+                  <div style="font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.name }}</div>
+                  <div style="font-size:11.5px; color:#667085; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.meta }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ searching }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; overflow:auto; padding:6px 8px 10px; display:flex; flex-direction:column; gap:10px">
+            <sc-for list="{{ resultGroups }}" as="g" hint-placeholder-count="2">
+              <div style="display:flex; flex-direction:column; gap:2px">
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px 4px">
+                  <span style="font-size:10.5px; font-weight:800; letter-spacing:0.09em; color:#667085">{{ g.label }}</span>
+                  <span style="font-size:11px; font-weight:600; color:#98A2B3">{{ g.count }}</span>
+                </div>
+                <sc-if value="{{ g.hasSimilar }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex; gap:7px; align-items:flex-start; margin:0 2px 6px; padding:9px 11px; background:#FFFAF2; border:1px solid #F6E3C4; border-radius:10px; font-size:12px; line-height:1.45; color:#8A5310; text-wrap:pretty">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B7791F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto; margin-top:1px"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 10v4"></path><path d="M12 17.5v.01"></path></svg>
+                    <span>Sites highlighted in amber have names very similar to other sites. Check the code and account carefully before selecting.</span>
+                  </div>
+                </sc-if>
+                <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="2">
+                  <div onClick="{{ r.go }}" style="{{ r.rowStyle }}" style-hover="background:#F7F8FA">
+                    <div style="{{ r.avatarStyle }}">{{ r.initials }}</div>
+                    <div style="flex:1; min-width:0">
+                      <div style="display:flex; align-items:center; gap:6px; min-width:0">
+                        <div style="font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0">{{ r.pre }}<mark style="background:#FFE3CC; color:#101828; border-radius:3px; padding:0 1px">{{ r.hit }}</mark>{{ r.post }}</div>
+                        <sc-if value="{{ r.hasCode }}" hint-placeholder-val="{{ false }}"><span style="flex:0 0 auto; font-size:10.5px; font-weight:700; color:#344054; background:#F1F3F6; border:1px solid #E3E8EE; border-radius:5px; padding:1px 5px; font-variant-numeric:tabular-nums">{{ r.code }}</span></sc-if>
+                      </div>
+                      <div style="font-size:11.5px; font-weight:600; color:#475467; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.meta }}</div>
+                      <sc-if value="{{ r.hasMeta2 }}" hint-placeholder-val="{{ false }}"><div style="font-size:11.5px; color:#667085; margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.meta2 }}</div></sc-if>
+                    </div>
+                    <span style="flex:0 0 auto; font-size:10.5px; font-weight:700; color:#475467; background:#F1F3F6; border-radius:5px; padding:2px 6px">{{ r.type }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-for>
+            <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:48px 16px; text-align:center">
+                <span style="font-size:14px; font-weight:700; color:#101828">{{ noResultsText }}</span>
+                <span style="font-size:12.5px; color:#667085; text-wrap:pretty">{{ noResultsHint }}</span>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+        </sc-if>
+      </div>
+      <div style="position:relative; flex:1 1 0; min-width:0; height:620px; background:#fff; border:1px solid #E3E8EE; border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05)">
+        <sc-if value="{{ noProfile }}" hint-placeholder-val="{{ true }}">
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; padding:32px; text-align:center">
+            <span style="font-size:16px; font-weight:700; color:#101828">No record selected</span>
+            <span style="max-width:340px; font-size:13px; line-height:1.55; color:#667085; text-wrap:pretty">Search on the left and pick a result to open its profile.</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ hasProfile }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 26px; background:#FFF8F2; border-bottom:1px solid #FBD9BC; box-shadow:inset 3px 0 0 #E2620F">
+          <span style="font-size:10.5px; font-weight:800; letter-spacing:0.09em; color:#B44B08">YOU'RE MANAGING</span>
+          <span style="font-size:13px; font-weight:700; color:#101828">{{ pName }}</span>
+          <span style="font-size:11.5px; font-weight:700; color:#344054; background:#fff; border:1px solid #FBD9BC; border-radius:5px; padding:1px 6px; font-variant-numeric:tabular-nums">{{ pCode }}</span>
+          <span style="font-size:12px; color:#475467; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ pPathText }}</span>
+        </div>
+        <div style="padding:18px 26px 20px; border-bottom:1px solid #F1F4F8; display:flex; flex-direction:column; gap:14px">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; min-height:18px">
+            <sc-for list="{{ pCrumbs }}" as="c" hint-placeholder-count="2">
+              <div style="display:flex; align-items:center; gap:6px">
+                <sc-if value="{{ c.sep }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px; color:#C3CAD4">›</span></sc-if>
+                <span onClick="{{ c.go }}" style="{{ c.style }}">{{ c.label }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap">
+            <div style="{{ pAvatarStyle }}">{{ pInitials }}</div>
+            <div style="flex:1 1 240px; min-width:0">
+              <h2 style="margin:0; font-size:22px; font-weight:700; letter-spacing:-0.02em; color:#101828">{{ pName }}</h2>
+              <div style="display:flex; align-items:center; gap:8px; margin-top:7px; flex-wrap:wrap">
+                <span style="font-size:11px; font-weight:700; letter-spacing:0.04em; color:#B44B08; background:#FFF4EC; border:1px solid #FBD9BC; border-radius:6px; padding:2px 8px">{{ pKind }}</span>
+                <span style="font-size:13px; font-weight:700; color:#101828; background:#F1F3F6; border:1px solid #E3E8EE; border-radius:6px; padding:2px 8px; font-variant-numeric:tabular-nums">Code {{ pCode }}</span>
+                <span style="display:flex; align-items:center; gap:5px; font-size:12px; font-weight:600; color:#186B3F"><span style="width:7px; height:7px; border-radius:99px; background:#2E9E5E"></span>Active</span>
+              </div>
+              <sc-if value="{{ pHasSub }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px; color:#475467; margin-top:7px">{{ pSub }}</div></sc-if>
+            </div>
+            <div style="display:flex; gap:8px; flex:0 0 auto">
+              <button onClick="{{ openRemove }}" style="border:1px solid transparent; background:transparent; border-radius:9px; padding:9px 12px; font-family:inherit; font-size:13px; font-weight:600; color:#B42318; cursor:pointer" style-hover="background:#FEF3F2">Remove</button>
+              <button onClick="{{ openEdit }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-family:inherit; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">Edit {{ pKindLower }}</button>
+              <sc-if value="{{ pHasChildren }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ openAdd }}" style="border:0; background:#E2620F; border-radius:9px; padding:9px 14px; font-family:inherit; font-size:13px; font-weight:600; color:#fff; cursor:pointer" style-hover="background:#B44B08">+ Add {{ pChildNoun }}</button>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+        <div style="flex:1; overflow:auto; padding:22px 26px 26px; display:flex; flex-direction:column; gap:22px">
+          <sc-if value="{{ pHasSimilar }}" hint-placeholder-val="{{ false }}">
+            <div style="border:1px solid #F6E3C4; background:#FFFAF2; border-radius:12px; padding:12px 14px; display:flex; flex-direction:column; gap:8px">
+              <div style="display:flex; align-items:center; gap:7px">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B7791F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 10v4"></path><path d="M12 17.5v.01"></path></svg>
+                <span style="font-size:13px; font-weight:700; color:#8A5310">{{ pSimilarTitle }}</span>
+              </div>
+              <span style="font-size:12.5px; line-height:1.5; color:#6B4A12; text-wrap:pretty">Check the code and account above before making changes. Not the one you meant? Switch below.</span>
+              <sc-for list="{{ pSimilar }}" as="o" hint-placeholder-count="1">
+                <div onClick="{{ o.go }}" style="display:flex; align-items:center; gap:10px; padding:8px 10px; background:#fff; border:1px solid #F6E3C4; border-radius:9px; cursor:pointer" style-hover="border-color:#E9C58C">
+                  <span style="font-size:13px; font-weight:600; color:#101828">{{ o.name }}</span>
+                  <span style="font-size:10.5px; font-weight:700; color:#344054; background:#F1F3F6; border-radius:5px; padding:1px 5px">{{ o.code }}</span>
+                  <span style="flex:1; min-width:0; font-size:12px; color:#667085; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ o.path }}</span>
+                  <span style="font-size:12px; font-weight:600; color:#E2620F">Switch</span>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px">
+            <sc-for list="{{ pStats }}" as="st" hint-placeholder-count="3">
+              <div style="border:1px solid #E3E8EE; border-radius:12px; padding:14px 16px; background:#FAFBFC">
+                <div style="font-size:24px; font-weight:700; letter-spacing:-0.02em; color:#101828; font-variant-numeric:tabular-nums; line-height:1.15">{{ st.value }}</div>
+                <div style="font-size:12px; font-weight:600; color:#667085; margin-top:4px">{{ st.label }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:flex-start">
+            <sc-if value="{{ pHasChildren }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1.4 1 340px; min-width:0; display:flex; flex-direction:column; gap:8px">
+                <div style="display:flex; align-items:center; gap:8px; padding:0 2px 4px">
+                  <span style="font-size:14px; font-weight:700; color:#101828">{{ pChildTitle }}</span>
+                  <span style="font-size:11px; font-weight:700; color:#475467; background:#F1F3F6; border-radius:5px; padding:1px 6px">{{ pChildCount }}</span>
+                </div>
+                <sc-for list="{{ pChildren }}" as="ch" hint-placeholder-count="2">
+                  <div onClick="{{ ch.go }}" style="display:flex; align-items:center; gap:12px; padding:11px 12px; border:1px solid #E3E8EE; border-radius:11px; cursor:pointer; background:#fff" style-hover="border-color:#FBD9BC; background:#FFFCF9">
+                    <div style="{{ ch.avatarStyle }}">{{ ch.initials }}</div>
+                    <div style="flex:1; min-width:0">
+                      <div style="font-size:13.5px; font-weight:600; color:#101828; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ ch.name }}</div>
+                      <div style="font-size:11.5px; color:#667085; margin-top:2px">{{ ch.meta }}</div>
+                    </div>
+                    <span style="color:#98A2B3; font-size:15px">›</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <div style="flex:1 1 260px; min-width:0; border:1px solid #E3E8EE; border-radius:12px; padding:6px 16px">
+              <div style="font-size:14px; font-weight:700; color:#101828; padding:10px 0 6px">Details</div>
+              <sc-for list="{{ pDetails }}" as="d" hint-placeholder-count="3">
+                <div style="display:flex; justify-content:space-between; gap:14px; padding:10px 0; border-top:1px solid #F1F4F8">
+                  <span style="font-size:12.5px; color:#667085">{{ d.k }}</span>
+                  <span style="font-size:12.5px; font-weight:600; color:#344054; text-align:right">{{ d.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ modalOpen }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeModal }}" style="position:absolute; inset:0; background:rgba(16,24,40,.42); display:flex; align-items:center; justify-content:center; padding:24px; z-index:5">
+            <div onClick="{{ stop }}" style="width:440px; max-width:100%; background:#fff; border-radius:16px; box-shadow:0 20px 48px rgba(16,24,40,.22); padding:22px; display:flex; flex-direction:column; gap:16px">
+              <div style="display:flex; flex-direction:column; gap:6px">
+                <span style="font-size:17px; font-weight:700; letter-spacing:-0.01em; color:#101828">{{ mTitle }}</span>
+                <span style="font-size:13px; line-height:1.5; color:#475467; text-wrap:pretty">{{ mLead }}</span>
+              </div>
+              <div style="border:1px solid #FBD9BC; background:#FFF8F2; border-radius:12px; padding:12px 14px; box-shadow:inset 3px 0 0 #E2620F; display:flex; gap:12px; align-items:flex-start">
+                <div style="{{ mAvatarStyle }}">{{ mInitials }}</div>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:4px">
+                  <div style="display:flex; align-items:center; gap:7px; flex-wrap:wrap">
+                    <span style="font-size:14.5px; font-weight:700; color:#101828">{{ mName }}</span>
+                    <span style="font-size:12px; font-weight:700; color:#101828; background:#fff; border:1px solid #E3E8EE; border-radius:5px; padding:1px 6px; font-variant-numeric:tabular-nums">{{ mCode }}</span>
+                  </div>
+                  <span style="font-size:12.5px; font-weight:600; color:#475467">{{ mPath }}</span>
+                  <sc-if value="{{ mHasSub }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px; color:#667085">{{ mSub }}</span></sc-if>
+                </div>
+              </div>
+              <sc-if value="{{ mHasSimilar }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; gap:7px; align-items:flex-start; font-size:12.5px; line-height:1.45; color:#8A5310; background:#FFFAF2; border:1px solid #F6E3C4; border-radius:10px; padding:9px 11px">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#B7791F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto; margin-top:1px"><path d="M12 3 2 20h20L12 3z"></path><path d="M12 10v4"></path><path d="M12 17.5v.01"></path></svg>
+                  <span>{{ mSimilarText }}</span>
+                </div>
+              </sc-if>
+              <sc-if value="{{ mNeedsType }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:6px">
+                  <span style="font-size:12.5px; font-weight:600; color:#344054">{{ mTypeLabel }}</span>
+                  <input value="{{ confirmText }}" onChange="{{ onConfirmText }}" placeholder="{{ mCode }}" style="border:1px solid #E3E8EE; border-radius:9px; padding:9px 11px; font-family:inherit; font-size:13px; color:#101828; outline:none; font-variant-numeric:tabular-nums" />
+                </div>
+              </sc-if>
+              <div style="display:flex; justify-content:flex-end; gap:8px">
+                <button onClick="{{ closeModal }}" style="border:1px solid #E3E8EE; background:#fff; border-radius:9px; padding:9px 14px; font-family:inherit; font-size:13px; font-weight:600; color:#344054; cursor:pointer" style-hover="background:#F7F8FA">Cancel</button>
+                <button onClick="{{ confirmModal }}" style="{{ mConfirmStyle }}">{{ mConfirmLabel }}</button>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ toastOn }}" hint-placeholder-val="{{ false }}">
+          <div data-test="toast" style="position:absolute; left:50%; bottom:18px; transform:translateX(-50%); background:#101828; color:#fff; font-size:12.5px; font-weight:600; border-radius:10px; padding:9px 14px; box-shadow:0 8px 24px rgba(16,24,40,.25); white-space:nowrap; z-index:6">{{ toastText }}</div>
+        </sc-if>
+      </div>
+    </div>
+    </div>
+  </div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+const DATA = [
+  { id: "sun", name: "Suntory", code: "580111", initials: "SU", bg: "#DCEFF5", fg: "#17627A", companies: [
+      { id: "sbp", name: "Suntory Beverage PH", code: "GBI", initials: "SB", bg: "#FCE7F0", fg: "#96305F", sites: [
+          { name: "Bread Plant", initials: "BP", bg: "#FCE7F0", fg: "#96305F", meta: "Metro Manila · 62 agents" },
+          { name: "Cake Plant", initials: "CP", bg: "#E8E3F8", fg: "#50399C", meta: "Metro Manila · 51 agents" } ] },
+      { id: "sfp", name: "Suntory Foods PH", code: "GBF", initials: "SF", bg: "#FFEFD9", fg: "#8A5310", sites: [
+          { name: "Commissary", initials: "CO", bg: "#FFEFD9", fg: "#8A5310", meta: "Metro Manila · 35 agents" },
+          { name: "Suntory Laguna Warehouse", initials: "LW", bg: "#DCEFF5", fg: "#17627A", meta: "Sta. Rosa · 28 agents" } ] } ] },
+  { id: "abc", name: "ABC Mall Group", code: "ROS551", initials: "AM", bg: "#E4F3E9", fg: "#186B3F", companies: [
+      { id: "abr", name: "ABC Retail Corp", code: "ARC", initials: "AR", bg: "#E4F3E9", fg: "#186B3F", sites: [
+          { name: "Ortigas Flagship", initials: "OF", bg: "#E4F3E9", fg: "#186B3F", meta: "Pasig · 88 agents" },
+          { name: "Bred Plant", initials: "BP", bg: "#FFEFD9", fg: "#8A5310", meta: "Pasig · 12 agents" },
+          { name: "Alabang Branch", initials: "AB", bg: "#DCEFF5", fg: "#17627A", meta: "Muntinlupa · 40 agents" } ] },
+      { id: "abl", name: "ABC Leisure Inc", code: "ALI", initials: "AL", bg: "#F2E9DC", fg: "#7A5518", sites: [
+          { name: "Cinema Complex", initials: "CC", bg: "#F2E9DC", fg: "#7A5518", meta: "Pasig · 24 agents" } ] } ] },
+  { id: "jlj", name: "JLJ Group", code: "SGU549", initials: "JG", bg: "#E8E3F8", fg: "#50399C", companies: [
+      { id: "jlm", name: "JLJ Manpower Inc", code: "JMI", initials: "JM", bg: "#E8E3F8", fg: "#50399C", sites: [
+          { name: "Caloocan Hub", initials: "CH", bg: "#E8E3F8", fg: "#50399C", meta: "Caloocan · 19 agents" },
+          { name: "Megamall Kiosk", initials: "MK", bg: "#FCE7F0", fg: "#96305F", meta: "Mandaluyong · 6 agents" } ] },
+      { id: "jmg", name: "JLJ Mega Staffing", code: "JMS", initials: "JS", bg: "#FFEFD9", fg: "#8A5310", sites: [
+          { name: "Quezon City Office", initials: "QC", bg: "#FFEFD9", fg: "#8A5310", meta: "Quezon City · 14 agents" },
+          { name: "Laguna Warehouse Suntory", initials: "LW", bg: "#E4F3E9", fg: "#186B3F", meta: "Calamba · 9 agents" } ] } ] },
+  { id: "mgw", name: "MegaWorld Holdings", code: "MWH310", initials: "MW", bg: "#DCEFF5", fg: "#17627A", companies: [
+      { id: "mwr", name: "MegaWorld Residences", code: "MWR", initials: "MR", bg: "#DCEFF5", fg: "#17627A", sites: [
+          { name: "McKinley Hill Tower", initials: "MH", bg: "#DCEFF5", fg: "#17627A", meta: "Taguig · 32 agents" },
+          { name: "Mega Eastwood Plaza", initials: "ME", bg: "#E4F3E9", fg: "#186B3F", meta: "Quezon City · 45 agents" } ] },
+      { id: "mwl", name: "Uptown Leasing Corp", code: "ULC", initials: "UL", bg: "#F2E9DC", fg: "#7A5518", sites: [
+          { name: "Uptown Mall", initials: "UM", bg: "#F2E9DC", fg: "#7A5518", meta: "BGC · 27 agents" } ] } ] },
+  { id: "mgf", name: "Mega Foods International", code: "MFI702", initials: "MF", bg: "#FFEFD9", fg: "#8A5310", companies: [
+      { id: "mfc", name: "Mega Canning Corp", code: "MCC", initials: "MC", bg: "#FFEFD9", fg: "#8A5310", sites: [
+          { name: "Mega Sardines Plant", initials: "MS", bg: "#FFEFD9", fg: "#8A5310", meta: "Zamboanga · 70 agents" },
+          { name: "Bread Plant", initials: "BP", bg: "#E4F3E9", fg: "#186B3F", meta: "Zamboanga · 26 agents" },
+          { name: "Cold Storage Depot", initials: "CS", bg: "#DCEFF5", fg: "#17627A", meta: "Zamboanga · 18 agents" } ] },
+      { id: "mfd", name: "Mega Distribution Inc", code: "MDI", initials: "MD", bg: "#E8E3F8", fg: "#50399C", sites: [
+          { name: "Cebu Mega Hub", initials: "CM", bg: "#E8E3F8", fg: "#50399C", meta: "Cebu · 41 agents" },
+          { name: "Mega Sardines Plant 2", initials: "M2", bg: "#DCEFF5", fg: "#17627A", meta: "Cebu · 33 agents" } ] } ] },
+  { id: "mgl", name: "Megaline Logistics", code: "MLL118", initials: "ML", bg: "#E4F3E9", fg: "#186B3F", companies: [
+      { id: "mlf", name: "Megaline Freight", code: "MLF", initials: "LF", bg: "#E4F3E9", fg: "#186B3F", sites: [
+          { name: "Port Area Yard", initials: "PA", bg: "#E4F3E9", fg: "#186B3F", meta: "Manila · 53 agents" },
+          { name: "Clark Mega Depot", initials: "CD", bg: "#FCE7F0", fg: "#96305F", meta: "Pampanga · 22 agents" },
+          { name: "Cebu Hub", initials: "CH", bg: "#E8E3F8", fg: "#50399C", meta: "Mandaue · 17 agents" } ] } ] }
+];
+
+let _sn = 1001;
+DATA.forEach(p => p.companies.forEach(c => c.sites.forEach(x => { x.code = "ST-" + (_sn++); })));
+const normName = (n) => n.toLowerCase().replace(/[^a-z]/g, "");
+const ALL_SITES = [];
+DATA.forEach(p => p.companies.forEach(c => c.sites.forEach(x => ALL_SITES.push({ p, c, x, key: p.id + c.id + x.name, norm: normName(x.name) }))));
+const tokens = (n) => n.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+const editDist = (a, b) => {
+  if (Math.abs(a.length - b.length) > 2) return 9;
+  let prev = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    prev = cur;
+  }
+  return prev[b.length];
+};
+// Rules: 1) same letters ignoring spaces/digits/punctuation  2) ≤2 letter edits (names ≥6 letters)  3) ≥80% shared words (of the shorter name, min 2 words)
+const simReason = (a, b) => {
+  const na = normName(a), nb = normName(b);
+  if (na === nb) return "same name";
+  if (Math.min(na.length, nb.length) >= 6 && editDist(na, nb) <= 2) return "1–2 letters apart";
+  const ta = tokens(a), tb = tokens(b);
+  if (Math.min(ta.length, tb.length) >= 2) {
+    const shared = ta.filter(t => tb.includes(t)).length;
+    if (shared / Math.min(ta.length, tb.length) >= 0.8) return ta.length === tb.length ? "same words, different order" : "same words + extra";
+  }
+  return null;
+};
+const lookalikes = (key, name) => ALL_SITES.filter(o => o.key !== key).map(o => ({ ...o, reason: simReason(name, o.x.name) })).filter(o => o.reason);
+
+const av = (bg, fg, size) => "width:" + size + "px; height:" + size + "px; border-radius:9px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; font-size:" + (size > 30 ? 12 : 10.5) + "px; font-weight:700; letter-spacing:-0.01em; background:" + bg + "; color:" + fg;
+const row = (active, indent) => "display:flex; align-items:center; gap:10px; padding:9px 10px 9px " + (10 + indent) + "px; border-radius:10px; cursor:pointer; border:1px solid " + (active ? "#FBD9BC" : "transparent") + "; background:" + (active ? "#FFF8F2" : "transparent");
+const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+
+class Component extends DCLogic {
+  state = {
+    level: 0, acct: 0, comp: 0,
+    scope: 1, filterAcct: null, filterComp: null, scopeSel: null, pinned: null, broad: [false, false, false],
+    open: { sun: true, sbp: true }, treeSel: "sbp",
+    q: "", submitted: "", autoTab: false, qFocus: false,
+    modal: null, confirmText: "", toast: "", collapsed: false, keepOpen: false
+  };
+
+  componentDidUpdate() {
+    if (!this.state.autoTab || !this._found) return;
+    const f = this._found, sc = this.state.scope;
+    const next = f[sc].length ? sc : [0, 1, 2].find(i => f[i].length);
+    this.setState({ autoTab: false, scope: next === undefined ? sc : next });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const a = DATA[s.acct], c = a.companies[s.comp];
+    const totalSites = DATA.reduce((n, x) => n + x.companies.reduce((m, y) => m + y.sites.length, 0), 0);
+    const totalComps = DATA.reduce((n, x) => n + x.companies.length, 0);
+
+    // 1A — sliding drill-down
+    const slide = {
+      slideTitle: s.level === 0 ? "Accounts" : s.level === 1 ? a.name : c.name,
+      slideSub: s.level === 0 ? plural(DATA.length, "account") : s.level === 1 ? plural(a.companies.length, "company").replace("companys", "companies") : a.name + " · " + plural(c.sites.length, "site"),
+      slideSubStyle: "font-size:11.5px; color:#667085; margin-top:2px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap",
+      slideSearch: s.level === 0 ? "Search accounts" : s.level === 1 ? "Search companies" : "Search sites",
+      slideBack: () => this.setState({ level: Math.max(0, s.level - 1) }),
+      slideBackStyle: "width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-family:inherit; cursor:pointer; flex:0 0 auto; transition:opacity .2s; border:1px solid " + (s.level ? "#E3E8EE" : "transparent") + "; background:#fff; color:#344054; opacity:" + (s.level ? "1" : "0") + "; pointer-events:" + (s.level ? "auto" : "none"),
+      slideTrackStyle: "display:flex; width:300%; height:100%; transition:transform .34s cubic-bezier(.4,0,.2,1); transform:translateX(-" + (s.level * 33.3333).toFixed(4) + "%)",
+      slideAccounts: DATA.map((x, i) => ({
+        name: x.name, initials: x.initials,
+        meta: x.code + " · " + plural(x.companies.length, "company").replace("companys", "companies"),
+        avatarStyle: av(x.bg, x.fg, 34),
+        style: row(s.level > 0 && i === s.acct, 0),
+        go: () => this.setState({ acct: i, comp: 0, level: 1 })
+      })),
+      slideCompanies: a.companies.map((x, i) => ({
+        name: x.name, initials: x.initials,
+        meta: x.code + " · " + plural(x.sites.length, "site"),
+        avatarStyle: av(x.bg, x.fg, 34),
+        style: row(s.level > 1 && i === s.comp, 0),
+        go: () => this.setState({ comp: i, level: 2 })
+      })),
+      slideSites: c.sites.map(x => ({
+        name: x.name, initials: x.initials, meta: x.meta,
+        avatarStyle: av(x.bg, x.fg, 34), style: row(false, 0), go: () => {}
+      }))
+    };
+
+    // 1B — scope toggle
+    const fA = s.filterAcct ? DATA.find(x => x.id === s.filterAcct) : null;
+    const fC = s.filterComp && fA ? fA.companies.find(x => x.id === s.filterComp) : null;
+    let scopeRows = [];
+    if (s.scope === 0) {
+      scopeRows = DATA.map(x => ({
+        id: x.id, name: x.name, initials: x.initials, bg: x.bg, fg: x.fg,
+        meta: x.code + " · " + plural(x.companies.length, "company").replace("companys", "companies") + " · " + plural(x.companies.reduce((n, y) => n + y.sites.length, 0), "site"),
+        go: () => this.setState({ scope: 1, filterAcct: x.id, filterComp: null, scopeSel: x.id })
+      }));
+    } else if (s.scope === 1) {
+      (fA ? [fA] : DATA).forEach(p => p.companies.forEach(x => scopeRows.push({
+        id: x.id, name: x.name, initials: x.initials, bg: x.bg, fg: x.fg,
+        meta: p.name + " · " + plural(x.sites.length, "site"),
+        go: () => this.setState({ scope: 2, filterAcct: p.id, filterComp: x.id, scopeSel: x.id })
+      })));
+    } else {
+      (fA ? [fA] : DATA).forEach(p => (fC ? [fC] : p.companies).forEach(cc => cc.sites.forEach(x => scopeRows.push({
+        id: p.id + cc.id + x.name, name: x.name, initials: x.initials, bg: x.bg, fg: x.fg,
+        meta: p.name + " › " + cc.name,
+        go: () => this.setState({ scopeSel: p.id + cc.id + x.name, collapsed: !this.state.keepOpen })
+      }))));
+    }
+
+    // 1B — global search
+    const q = s.submitted.toLowerCase();
+    const searching = q.length > 0;
+    const split = (name) => {
+      const i = name.toLowerCase().indexOf(q);
+      return i < 0 ? { pre: name, hit: "", post: "" } : { pre: name.slice(0, i), hit: name.slice(i, i + q.length), post: name.slice(i + q.length) };
+    };
+    const hits = (name, code) => name.toLowerCase().includes(q) || (code && code.toLowerCase().includes(q));
+    const pin = (pid, cid, xk) => {
+      const o = s.pinned;
+      if (o && o.p === pid && (!cid || o.c === cid) && (!xk || o.x === xk)) return o;
+      return { p: pid, c: cid || null, x: xk || null };
+    };
+    const found = [[], [], []];
+    if (searching) DATA.forEach(p => {
+      if (hits(p.name, p.code)) found[0].push({ key: p.id, ...split(p.name), initials: p.initials, bg: p.bg, fg: p.fg, type: "Account",
+        meta: (p.name.toLowerCase().includes(q) ? "" : "Code match · ") + p.code + " · " + plural(p.companies.length, "company").replace("companys", "companies"),
+        go: () => this.setState({ q: "", submitted: "", scope: 1, filterAcct: p.id, filterComp: null, scopeSel: p.id, pinned: pin(p.id), broad: [false, false, false] }) });
+      p.companies.forEach(cc => {
+        if (hits(cc.name, cc.code)) found[1].push({ key: cc.id, ...split(cc.name), initials: cc.initials, bg: cc.bg, fg: cc.fg, type: "Company",
+          meta: (cc.name.toLowerCase().includes(q) ? "" : "Code " + cc.code + " · ") + p.name + " · " + plural(cc.sites.length, "site"),
+          go: () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: cc.id, pinned: pin(p.id, cc.id), broad: [false, false, false] }) });
+        cc.sites.forEach(x => {
+          const sk = p.id + cc.id + x.name, simL = lookalikes(sk, x.name), sim = simL.length;
+          if (hits(x.name, x.code)) found[2].push({ key: sk, ...split(x.name), initials: x.initials, bg: x.bg, fg: x.fg, type: "Site",
+            code: x.code, hasCode: true, meta: p.name + " › " + cc.name, meta2: x.meta, hasMeta2: true,
+            similar: sim > 0, norm: normName(x.name), similarText: sim ? "Similar to " + simL[0].x.name + " (" + simL[0].reason + ")" + (sim > 1 ? " +" + (sim - 1) + " more" : "") + " — check the code" : "",
+            go: () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: p.id + cc.id + x.name, pinned: pin(p.id, cc.id, p.id + cc.id + x.name), collapsed: !this.state.keepOpen, broad: [false, false, false] }) });
+        });
+      });
+    });
+    found[2].sort((a, b) => (b.similar - a.similar) || (a.similar && b.similar ? a.norm.slice(0, 4).localeCompare(b.norm.slice(0, 4)) : 0));
+    const groupLabels = ["ACCOUNTS", "COMPANIES", "SITES"];
+    const resultGroups = found.map((rows, i) => ({ i, rows, label: groupLabels[i] }))
+      .filter(g => g.i === s.scope && g.rows.length)
+      .map(g => ({ label: g.label, count: g.rows.length, hasSimilar: g.rows.some(r => r.similar), rows: g.rows.map(r => ({ hasCode: false, hasMeta2: false, similar: false, ...r, avatarStyle: av(r.bg, r.fg, 32),
+        rowStyle: "display:flex; align-items:flex-start; gap:10px; padding:8px 10px; border-radius:10px; cursor:pointer; border:1px solid " + (r.similar ? "#F6E3C4" : "transparent") + "; background:" + (r.similar ? "#FFFCF7" : "transparent") })) }));
+
+    // 1C — tree
+    const treeRows = [];
+    DATA.forEach(x => {
+      const openA = !!s.open[x.id];
+      treeRows.push({
+        id: x.id, depth: 0, name: x.name, initials: x.initials, bg: x.bg, fg: x.fg, open: openA, branch: true,
+        meta: x.code + " · " + plural(x.companies.length, "company").replace("companys", "companies"),
+        go: () => this.setState({ open: { ...s.open, [x.id]: !openA }, treeSel: x.id })
+      });
+      if (!openA) return;
+      x.companies.forEach(y => {
+        const openC = !!s.open[y.id];
+        treeRows.push({
+          id: y.id, depth: 1, name: y.name, initials: y.initials, bg: y.bg, fg: y.fg, open: openC, branch: true,
+          meta: plural(y.sites.length, "site"),
+          go: () => this.setState({ open: { ...s.open, [y.id]: !openC }, treeSel: y.id })
+        });
+        if (!openC) return;
+        y.sites.forEach(z => treeRows.push({
+          id: y.id + z.name, depth: 2, name: z.name, initials: z.initials, bg: z.bg, fg: z.fg, branch: false,
+          meta: z.meta, go: () => this.setState({ treeSel: y.id + z.name })
+        }));
+      });
+    });
+
+    // 1B — profile pane
+    const agentsOf = (x) => parseInt((x.meta.match(/(\d+) agents/) || [0, 0])[1], 10);
+    const locOf = (x) => x.meta.split(" · ")[0];
+    const uniq = (arr) => arr.filter((v, i) => arr.indexOf(v) === i);
+    const selAcct = (p) => () => this.setState({ q: "", submitted: "", scope: 0, filterAcct: p.id, filterComp: null, scopeSel: p.id, pinned: pin(p.id) });
+    const selComp = (p, cc) => () => this.setState({ q: "", submitted: "", scope: 1, filterAcct: p.id, filterComp: cc.id, scopeSel: cc.id, pinned: pin(p.id, cc.id) });
+    const selSite = (p, cc, x) => () => this.setState({ q: "", submitted: "", scope: 2, filterAcct: p.id, filterComp: cc.id, scopeSel: p.id + cc.id + x.name, pinned: pin(p.id, cc.id, p.id + cc.id + x.name), collapsed: !this.state.keepOpen });
+    const crumbStyle = (last) => "font-size:12px; font-weight:600; cursor:" + (last ? "default" : "pointer") + "; color:" + (last ? "#101828" : "#667085");
+    let prof = null;
+    DATA.forEach(p => {
+      const pSites = p.companies.reduce((m, y) => m.concat(y.sites), []);
+      if (p.id === s.scopeSel) prof = {
+        kind: "Account", pathText: "Top-level account", sub: "", similar: [], name: p.name, code: p.code, initials: p.initials, bg: p.bg, fg: p.fg, childNoun: "company", childTitle: "Companies",
+        crumbs: [{ label: p.name, go: () => {} }],
+        stats: [{ value: p.companies.length, label: "Companies" }, { value: pSites.length, label: "Sites" }, { value: pSites.reduce((n, x) => n + agentsOf(x), 0), label: "Agents" }],
+        children: p.companies.map(cc => ({ name: cc.name, initials: cc.initials, avatarStyle: av(cc.bg, cc.fg, 36), meta: cc.code + " · " + plural(cc.sites.length, "site"), go: selComp(p, cc) })),
+        details: [{ k: "Account code", v: p.code }, { k: "Locations", v: uniq(pSites.map(locOf)).join(", ") }, { k: "Status", v: "Active" }]
+      };
+      p.companies.forEach(cc => {
+        if (cc.id === s.scopeSel) prof = {
+          kind: "Company", pathText: "under " + p.name, sub: "", similar: [], name: cc.name, code: cc.code, initials: cc.initials, bg: cc.bg, fg: cc.fg, childNoun: "site", childTitle: "Sites",
+          crumbs: [{ label: p.name, go: selAcct(p) }, { label: cc.name, go: () => {} }],
+          stats: [{ value: cc.sites.length, label: "Sites" }, { value: cc.sites.reduce((n, x) => n + agentsOf(x), 0), label: "Agents" }, { value: uniq(cc.sites.map(locOf)).length, label: "Locations" }],
+          children: cc.sites.map(x => ({ name: x.name, initials: x.initials, avatarStyle: av(x.bg, x.fg, 36), meta: x.code + " · " + x.meta, go: selSite(p, cc, x) })),
+          details: [{ k: "Company code", v: cc.code }, { k: "Account", v: p.name + " (" + p.code + ")" }, { k: "Locations", v: uniq(cc.sites.map(locOf)).join(", ") }]
+        };
+        cc.sites.forEach(x => {
+          if (p.id + cc.id + x.name === s.scopeSel) prof = {
+            kind: "Site", pathText: "under " + p.name + " › " + cc.name, sub: x.meta,
+            similar: lookalikes(p.id + cc.id + x.name, x.name).map(o => ({ name: o.x.name, code: o.x.code, path: o.reason + " · " + o.p.name + " › " + o.c.name, go: selSite(o.p, o.c, o.x) })),
+            name: x.name, code: x.code, initials: x.initials, bg: x.bg, fg: x.fg, childNoun: "", childTitle: "",
+            crumbs: [{ label: p.name, go: selAcct(p) }, { label: cc.name, go: selComp(p, cc) }, { label: x.name, go: () => {} }],
+            stats: [{ value: agentsOf(x), label: "Agents" }, { value: locOf(x), label: "Location" }],
+            children: [],
+            details: [{ k: "Site code", v: x.code }, { k: "Company", v: cc.name + " (" + cc.code + ")" }, { k: "Account", v: p.name + " (" + p.code + ")" }, { k: "Location", v: locOf(x) }]
+          };
+        });
+      });
+    });
+
+    const pathRows = [];
+    const pp = s.pinned ? DATA.find(p => p.id === s.pinned.p) : null;
+    const pc = pp && s.pinned.c ? pp.companies.find(c => c.id === s.pinned.c) : null;
+    const px = pc && s.pinned.x ? pc.sites.find(x => pp.id + pc.id + x.name === s.pinned.x) : null;
+    const acctMeta = (p) => p.code + " · " + plural(p.companies.length, "company").replace("companys", "companies");
+    const compMeta = (c) => c.code + " · " + plural(c.sites.length, "site");
+    let mkRow = null;
+    if (s.pinned) {
+      mkRow = (label, depth, key, o, meta, go) => {
+        const on = s.scopeSel === key;
+        return { label, name: o.name, initials: o.initials, meta, go,
+          avatarStyle: av(o.bg, o.fg, 34),
+          labelStyle: "font-size:10.5px; font-weight:700; letter-spacing:0.07em; color:#98A2B3; padding:" + (depth ? "6px" : "0") + " 8px 0 " + (8 + depth * 18) + "px",
+          style: "display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:10px; cursor:pointer; border:1px solid " + (on ? "#FBD9BC" : "#EDF0F4") + "; background:" + (on ? "#FFF8F2" : "#fff") + "; box-shadow:" + (on ? "inset 3px 0 0 #E2620F" : "none") };
+      };
+      if (pp) pathRows.push(mkRow("ACCOUNT", 0, pp.id, pp, pp.code + " · " + plural(pp.companies.length, "company").replace("companys", "companies"), selAcct(pp)));
+      if (pc) pathRows.push(mkRow("COMPANY", 1, pc.id, pc, pc.code + " · " + plural(pc.sites.length, "site"), selComp(pp, pc)));
+      if (px) pathRows.push(mkRow("SITE", 2, px && pp.id + pc.id + px.name, px, px.code + " · " + px.meta, selSite(pp, pc, px)));
+    }
+    const lvlRows = [0, 1, 2].map(i => {
+      if (!s.pinned) return [];
+      if (!s.broad[i]) return pathRows[i] ? [pathRows[i]] : [];
+      if (i === 0) return DATA.map(p => mkRow("", 0, p.id, p, acctMeta(p), selAcct(p)));
+      if (i === 1) return pp ? pp.companies.map(c => mkRow("", 0, c.id, c, compMeta(c), selComp(pp, c))) : [];
+      return pc ? pc.sites.map(x => mkRow("", 0, pp.id + pc.id + x.name, x, x.code + " · " + x.meta, selSite(pp, pc, x))) : [];
+    });
+    const broadLabel = ["ALL ACCOUNTS", pp ? "COMPANIES UNDER " + pp.name.toUpperCase() : "COMPANIES", pc ? "SITES UNDER " + pc.name.toUpperCase() : "SITES"];
+    this._found = found;
+    const nouns = ["accounts", "companies", "sites"];
+
+    const m = prof && s.modal;
+    const kl = prof ? prof.kind.toLowerCase() : "";
+    const needsType = m === "remove";
+    const canConfirm = !needsType || s.confirmText.trim().toUpperCase() === (prof ? prof.code.toUpperCase() : "");
+    const fullPath = prof ? prof.crumbs.map(c => c.label).join(" › ") : "";
+    const modalVals = {
+      modalOpen: !!m,
+      mTitle: m === "edit" ? "Edit this " + kl + "?" : m === "add" ? "Add a " + (prof && prof.childNoun) + " here?" : "Remove this " + kl + "?",
+      mLead: m === "edit" ? "Changes will apply only to the record below. Confirm it's the right one." : m === "add" ? "The new " + (prof && prof.childNoun) + " will be created under the record below." : "This can't be undone. Confirm the record below and type its code.",
+      mName: prof ? prof.name : "", mCode: prof ? prof.code : "", mPath: fullPath,
+      mSub: prof ? prof.sub : "", mHasSub: !!(prof && prof.sub),
+      mInitials: prof ? prof.initials : "", mAvatarStyle: prof ? av(prof.bg, prof.fg, 38) : "",
+      mHasSimilar: !!(prof && prof.similar.length),
+      mSimilarText: prof && prof.similar.length ? plural(prof.similar.length, "other site") + " named like this: " + prof.similar.map(o => o.name + " (" + o.code + ")").join(", ") + ". Make sure the code matches." : "",
+      mNeedsType: needsType, mTypeLabel: "Type " + (prof ? prof.code : "") + " to confirm",
+      confirmText: s.confirmText, onConfirmText: (e) => this.setState({ confirmText: e.target.value }),
+      mConfirmLabel: m === "edit" ? "Continue to edit" : m === "add" ? "Continue" : "Remove " + kl,
+      mConfirmStyle: "border:0; border-radius:9px; padding:9px 14px; font-family:inherit; font-size:13px; font-weight:600; color:#fff; cursor:" + (canConfirm ? "pointer" : "not-allowed") + "; opacity:" + (canConfirm ? "1" : "0.45") + "; background:" + (m === "remove" ? "#D92D20" : "#E2620F"),
+      closeModal: () => this.setState({ modal: null, confirmText: "" }),
+      stop: (e) => e.stopPropagation(),
+      confirmModal: () => {
+        if (!canConfirm || !prof) return;
+        const verb = m === "edit" ? "Editing " : m === "add" ? "Adding " + prof.childNoun + " under " : "Removed ";
+        this.setState({ modal: null, confirmText: "", toast: verb + prof.name + " (" + prof.code + ")" });
+        clearTimeout(this._tt); this._tt = setTimeout(() => this.setState({ toast: "" }), 2600);
+      },
+      openEdit: () => this.setState({ modal: "edit", confirmText: "" }),
+      openAdd: () => this.setState({ modal: "add", confirmText: "" }),
+      openRemove: () => this.setState({ modal: "remove", confirmText: "" }),
+      toastOn: !!s.toast, toastText: s.toast,
+      pPathText: prof ? prof.pathText : "", pHasSub: !!(prof && prof.sub), pSub: prof ? prof.sub : "",
+      pHasSimilar: !!(prof && prof.similar.length), pSimilar: prof ? prof.similar : [],
+      pSimilarTitle: prof && prof.similar.length ? plural(prof.similar.length, "other site") + " with a similar name" : ""
+    };
+
+    const railOn = s.collapsed;
+    const expand = (fn) => () => { this.setState({ collapsed: false }); fn && fn(); };
+    const railItems = [];
+    if (pp) railItems.push({ title: "Account · " + pp.name, initials: pp.initials, label: "ACCT", obj: pp, go: expand(selAcct(pp)), last: !pc });
+    if (pc) railItems.push({ title: "Company · " + pc.name, initials: pc.initials, label: "COMP", obj: pc, go: expand(selComp(pp, pc)), last: !px });
+    if (px) railItems.push({ title: "Site · " + px.name + " (" + px.code + ")", initials: px.initials, label: px.code, obj: px, go: expand(), last: true });
+    const railVals = {
+      railOn, sideOpen: !railOn,
+      sideStyle: "flex:0 0 " + (railOn ? 60 : 340) + "px; background:#fff; border:1px solid #E3E8EE; border-radius:14px; height:620px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 1px 2px rgba(16,24,40,.05); transition:flex-basis .22s ease",
+      railItems: railItems.map(r => ({ ...r, avatarStyle: av(r.obj.bg, r.obj.fg, 34), edge: r.last ? "inset 3px 0 0 #E2620F" : "none", labelColor: r.last ? "#B44B08" : "#98A2B3" })),
+      expandSide: () => this.setState({ collapsed: false }),
+      expandSearch: () => { this.setState({ collapsed: false }); setTimeout(() => { const i = document.querySelector('input[type="search"], input[placeholder*="earch"]'); i && i.focus(); }, 60); },
+      collapseSide: () => this.setState({ collapsed: true }),
+      toggleKeep: () => this.setState(st => ({ keepOpen: !st.keepOpen })),
+      keepTitle: s.keepOpen ? "Pinned open — click to auto-collapse after picking a site" : "Keep directory open after picking a site",
+      keepStyle: "width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; border:1px solid " + (s.keepOpen ? "#FBD9BC" : "#E3E8EE") + "; background:" + (s.keepOpen ? "#FFF4EC" : "#fff") + "; color:" + (s.keepOpen ? "#E2620F" : "#98A2B3")
+    };
+    return {
+      ...slide,
+      ...modalVals,
+      ...railVals,
+      hasQ: s.q.length > 0,
+      pending: s.q.trim().length > 0 && s.q.trim() !== s.submitted,
+      noResultsText: "No " + nouns[s.scope] + " match \u201C" + s.submitted + "\u201D",
+      noResultsHint: (found[0].length + found[1].length + found[2].length) ? "Check the other tabs for matches." : "Try an account code like 580111, or part of a site name.",
+      pKind: prof ? prof.kind.toUpperCase() : "",
+      pKindLower: prof ? prof.kind.toLowerCase() : "",
+      pName: prof ? prof.name : "Select an item",
+      pCode: prof ? prof.code : "",
+      pInitials: prof ? prof.initials : "",
+      pAvatarStyle: prof ? av(prof.bg, prof.fg, 52).replace("border-radius:9px", "border-radius:13px").replace("font-size:12px", "font-size:16px") : "display:none",
+      pCrumbs: prof ? prof.crumbs.map((c, i) => ({ label: c.label, go: c.go, sep: i > 0, style: crumbStyle(i === prof.crumbs.length - 1) })) : [],
+      pStats: prof ? prof.stats : [],
+      pHasChildren: !!(prof && prof.children.length),
+      pChildren: prof ? prof.children : [],
+      pChildCount: prof ? prof.children.length : 0,
+      pChildTitle: prof ? prof.childTitle : "",
+      pChildNoun: prof ? prof.childNoun : "",
+      pDetails: prof ? prof.details : [],
+      q: s.q, searching, notSearching: !searching,
+      noResults: searching && found[s.scope].length === 0,
+      resultGroups,
+      onQ: (e) => { const v = e.target.value; this.setState(v.trim() ? { q: v } : { q: v, submitted: "" }); },
+      onQKey: (e) => {
+        if (e.key === "Enter") { const t = s.q.trim(); if (t) this.setState({ submitted: t, autoTab: true }); }
+        else if (e.key === "Escape") this.setState({ q: "", submitted: "" });
+      },
+      onQFocus: () => this.setState({ qFocus: true }),
+      onQBlur: () => this.setState({ qFocus: false }),
+      clearQ: () => this.setState({ q: "", submitted: "" }),
+      searchBoxStyle: "display:flex; align-items:center; gap:8px; border-radius:10px; padding:9px 10px 9px 11px; transition:border-color .15s, box-shadow .15s; border:1px solid " + (s.qFocus ? "#F1A36A" : "#E3E8EE") + "; background:" + (s.qFocus || searching ? "#fff" : "#FAFBFC") + "; box-shadow:" + (s.qFocus ? "0 0 0 3px #FFEBDC" : "none"),
+      scopes: ["Accounts", "Companies", "Sites"].map((label, i) => {
+        const on = i === s.scope;
+        const count = searching ? found[i].length : lvlRows[i].length;
+        return {
+          label, count,
+          select: searching
+            ? () => this.setState({ scope: i })
+            : () => this.setState({ scope: i, filterComp: i < 2 ? null : s.filterComp, filterAcct: i === 0 ? null : s.filterAcct }),
+          style: "flex:1; display:flex; align-items:center; justify-content:center; gap:5px; border:0; border-radius:8px; padding:7px 3px; font-family:inherit; font-size:12.5px; cursor:pointer; transition:background .15s; font-weight:" + (on ? "700" : "500") + "; color:" + (on ? "#101828" : "#667085") + "; background:" + (on ? "#fff" : "transparent") + "; box-shadow:" + (on ? "0 1px 2px rgba(16,24,40,.1)" : "none"),
+          countStyle: "font-size:10.5px; font-weight:700; border-radius:5px; padding:1px 5px; background:" + (on ? "#FFF4EC" : "#E7EBF0") + "; color:" + (on ? "#B44B08" : "#667085")
+        };
+      }),
+      showFilter: false, neverTrue: false,
+      pathRows: lvlRows[s.scope], pathLabel: s.broad[s.scope] ? broadLabel[s.scope] : "SELECTED " + ["ACCOUNT", "COMPANY", "SITE"][s.scope],
+      canClear: !s.broad[s.scope] && lvlRows[s.scope].length > 0,
+      canNarrow: s.broad[s.scope] && !!pathRows[s.scope],
+      showPath: !searching && pathRows.length > 0, showIdle: !searching && pathRows.length === 0,
+      showPathEmpty: !searching && pathRows.length > 0 && lvlRows[s.scope].length === 0,
+      pathEmptyText: s.scope === 1 ? "Open a company from the account profile to see it here." : "Open a site from the company profile to see it here.",
+      clearPin: () => this.setState(s.scope === 0
+        ? { pinned: null, scopeSel: null, broad: [false, false, false] }
+        : { broad: s.broad.map((b, i) => i === s.scope ? true : b) }),
+      narrowPin: () => this.setState({ broad: s.broad.map((b, i) => i === s.scope ? false : b) }), hasProfile: !!prof, noProfile: !prof,
+      filterLabel: fC ? fA.name + " › " + fC.name : fA ? "Within " + fA.name : "",
+      clearFilter: () => this.setState({ filterAcct: null, filterComp: null }),
+      scopeRows: scopeRows.map(r => ({
+        name: r.name, meta: r.meta, initials: r.initials,
+        avatarStyle: av(r.bg, r.fg, 34), style: row(r.id === s.scopeSel, 0), go: r.go
+      })),
+      collapseAll: () => this.setState({ open: {} }),
+      treeRows: treeRows.map(r => ({
+        name: r.name, meta: r.meta, initials: r.initials, go: r.go,
+        avatarStyle: av(r.bg, r.fg, r.depth === 0 ? 30 : 26),
+        style: row(r.id === s.treeSel, r.depth * 16),
+        caretStyle: "flex:0 0 auto; width:12px; font-size:13px; transition:transform .2s; color:#98A2B3; display:" + (r.branch ? "block" : "block") + "; visibility:" + (r.branch ? "visible" : "hidden") + "; transform:rotate(" + (r.open ? "90deg" : "0deg") + ")",
+        nameStyle: "font-size:" + (r.depth === 0 ? "13.5px" : "13px") + "; font-weight:" + (r.depth === 2 ? "500" : "600") + "; overflow:hidden; text-overflow:ellipsis; white-space:nowrap",
+        metaStyle: "font-size:11px; color:#667085; margin-top:1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap"
+      }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>
